@@ -1,12 +1,11 @@
-import { Navbar } from './Components';
+import { AppRoutes } from './Routes/AppRoutes';
 import { Url } from './Utils/globals.variables';
 
 export const App = () => {
 
-  console.log('Url', Url);
   return (
-    <div>
-      <Navbar />
-      App</div>
+    <>
+      <AppRoutes />
+    </>
   );
 };

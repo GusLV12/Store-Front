@@ -44,8 +44,6 @@ export default [
         'newlines-between': 'always'
       }], // Organiza las importaciones en bloques separados
 
-      // 🔹 Desactiva el requerimiento de importar React en cada archivo
-      // 'react/react-in-jsx-scope': 'off',
       // 'import/no-unused-modules': ['warn', { unusedExports: true }], // Detecta módulos no utilizados
 
       'semi': ['warn', 'always'],

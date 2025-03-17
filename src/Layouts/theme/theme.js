@@ -3,7 +3,7 @@ import { createTheme } from '@mui/material/styles';
 export const theme = createTheme({
   palette: {
     primary: {
-      main: '#1976D2', // Azul primario
+      main: '#051221', // Azul primario
     },
     secondary: {
       main: '#D32F2F', // Rojo secundario
@@ -13,6 +13,7 @@ export const theme = createTheme({
     },
     text: {
       primary: '#333333', // Color de texto principal
+      secondary: '#ffffff', // Color de texto secundario
     },
   },
   typography: {

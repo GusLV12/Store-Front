@@ -6,7 +6,7 @@ export const theme = createTheme({
       main: '#051221', // Azul primario
     },
     secondary: {
-      main: '#D32F2F', // Rojo secundario
+      main: '#1976D2', // Rojo secundario
     },
     background: {
       default: '#F5F5F5', // Fondo general blanco
@@ -14,6 +14,12 @@ export const theme = createTheme({
     text: {
       primary: '#333333', // Color de texto principal
       secondary: '#ffffff', // Color de texto secundario
+    },
+    success: {
+      main: '#4CAF50', // Verde para éxito
+    },
+    error: {
+      main: '#F44336', // Rojo para error
     },
   },
   typography: {

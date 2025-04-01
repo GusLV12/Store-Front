@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { Button, Checkbox, FormControl, FormLabel, TextField, Typography } from '@mui/material';
 
-import { ThemeLayout } from '../../Layouts';
+import { theme, ThemeLayout } from '../../Layouts';
 import { useAuth } from '../../Context';
+import { SuggestionPrompt } from '../../Components';
 
 export const Login = () => {
   const { login } = useAuth();
@@ -31,37 +32,44 @@ export const Login = () => {
           </Typography>
           <form onSubmit={handleSubmit} className="mt-4 flex flex-col gap-8">
             <FormControl>
+              <FormLabel htmlFor="email">Email</FormLabel>
               <TextField
+                error={emailError}
+                helperText={emailErrorMessage}
                 id="email"
                 type="email"
                 name="email"
-                label="Correo"
                 placeholder="your@email.com"
+                autoComplete="email"
+                autoFocus
+                required
                 fullWidth
                 variant="outlined"
-                error={emailError}
-                helperText={emailErrorMessage}
-                className="rounded-full"
+                InputProps={{ style: { color: '#ffff' } }}
+                color={emailError ? 'error' : 'primary'}
               />
             </FormControl>
             <FormControl>
+              <FormLabel htmlFor="password">Password</FormLabel>
               <TextField
-                id="password"
-                type="password"
-                name="password"
-                label="Contraseña"
-                placeholder="••••••"
-                fullWidth
-                variant="outlined"
                 error={passwordError}
                 helperText={passwordErrorMessage}
-                className="bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                name="password"
+                placeholder="••••••"
+                type="password"
+                id="password"
+                autoComplete="current-password"
+                autoFocus
+                required
+                fullWidth
+                variant="outlined"
+                InputProps={{ style: { color: '#ffff' } }}
+                color={passwordError ? 'error' : 'primary'}
               />
             </FormControl>
-            <div className="flex items-center justify-items-start gap-2">
-              <Checkbox color="primary" className="text-primary" />
-              <Typography color="text">Remember me</Typography>
-            </div>
+
+            <SuggestionPrompt cln="text-white" bgColor={theme.palette.secondary.main}>Ingresa con tu correo y contraseña de empleado.</SuggestionPrompt>
+
             <Button
               type="submit"
               variant="contained"

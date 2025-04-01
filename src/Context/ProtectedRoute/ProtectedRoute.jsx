@@ -2,9 +2,12 @@ import { Navigate } from 'react-router-dom';
 
 import { useAuth } from '../AuthContext/AuthContext';
 
-export const ProtectedRoute = ({ children, allowedRole }) => {
+export const ProtectedRoute = ({ children, allowedRole = 'all' }) => {
   const { user } = useAuth();
 
+  if(allowedRole === 'all'){
+    return children;
+  }
   // Si no está autenticado, redirigir a login
   if (!user) {
     return <Navigate to="/login" replace />;

@@ -14,16 +14,33 @@ import AdbIcon from '@mui/icons-material/Adb';
 import AccountCircle from '@mui/icons-material/AccountCircle';
 import { Link } from 'react-router-dom';
 
-const pages = [{
-  name: 'Inicio',
-  url: '/',
-},
-{
-  name: 'Facturacion',
-  url: '/facturacion',
-}
+const pages = [
+  {
+    name: 'Inicio',
+    url: '/',
+  },
+  {
+    name: 'Provedores',
+    url: '/suppliers',
+  },
+  {
+    name: 'Creditos',
+    url: '/credits',
+  },
+  {
+    name: 'Reportes',
+    url: '/reports',
+  },
+  {
+    name: 'Cuentas',
+    url: '/counts',
+  },
+  {
+    name: 'Facturacion',
+    url: '/billing',
+  }
 ];
-const settings = ['Perfil', 'Salir'];
+const settings = [{ name: 'Perfil', url: 'profile' }, { name: 'Salir', url: '/login' }];
 
 export const Navbar = () => {
   const [anchorElNav, setAnchorElNav] = useState(null);
@@ -155,9 +172,13 @@ export const Navbar = () => {
               open={Boolean(anchorElUser)}
               onClose={handleCloseUserMenu}
             >
-              {settings.map((setting) => (
-                <MenuItem key={setting} onClick={handleCloseUserMenu}>
-                  <Typography sx={{ textAlign: 'center' }}>{setting}</Typography>
+              {settings.map(({ name, url }) => (
+                <MenuItem key={name} onClick={handleCloseUserMenu}>
+                  <Button
+                    component={Link}
+                    to={url}>
+                    <Typography sx={{ textAlign: 'center' }}>{name}</Typography>
+                  </Button>
                 </MenuItem>
               ))}
             </Menu>

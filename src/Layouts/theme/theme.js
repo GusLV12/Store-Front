@@ -25,4 +25,20 @@ export const theme = createTheme({
   typography: {
     fontFamily: 'Roboto, sans-serif',
   },
+  components: {
+    MuiOutlinedInput: {
+      styleOverrides: {
+        root: {
+          borderRadius: '999px',
+        },
+      },
+    },
+    MuiPaper: {
+      styleOverrides: {
+        outlined: {
+          borderRadius: '999px', // súper redondeado
+        },
+      },
+    },
+  },
 });

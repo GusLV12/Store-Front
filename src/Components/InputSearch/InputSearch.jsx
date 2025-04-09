@@ -50,7 +50,7 @@ export const InputSearch = ({
         display: 'flex',
         alignItems: 'center',
         width,
-        height: '4.2rem',
+        height: '3rem',
         borderColor: '#BBB',
         ...sx,
       }}

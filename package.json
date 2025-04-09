@@ -17,6 +17,7 @@
     "@mui/material": "^6.4.6",
     "@mui/styled-engine-sc": "^6.4.6",
     "@tailwindcss/vite": "^4.0.9",
+    "axios": "^1.8.4",
     "clsx": "^2.1.1",
     "lodash": "^4.17.21",
     "react": "^19.0.0",

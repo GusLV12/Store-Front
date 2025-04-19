@@ -36,5 +36,5 @@ export const useRequest = (requestFunction = {}) => {
     }
   };
 
-  return { response, loading, error, makeRequest, setResponse };
+  return { response, loading, error, makeRequest };
 };

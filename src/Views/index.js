@@ -6,3 +6,5 @@ export * from './Suppliers/Suppliers';
 export * from './Counts/Counts';
 export * from './Billing/Billing';
 export * from './Profile/Profile';
+export * from './Promotions/Promotion';
+export * from './NotFound/NotFound';

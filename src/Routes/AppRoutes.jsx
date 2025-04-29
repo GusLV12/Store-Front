@@ -1,7 +1,7 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 
 import { MainLayout } from '../Layouts';
-import { Billing, Counts, Credits, Home, Login, Profile, Reports, Suppliers } from '../Views';
+import { Billing, Counts, Credits, Home, Login, Profile, Promotion, Reports, Suppliers } from '../Views';
 import { AuthProvider, ProtectedRoute } from '../Context';
 
 export const AppRoutes = () => {
@@ -16,11 +16,11 @@ export const AppRoutes = () => {
             <Route path="/credits" element={<ProtectedRoute allowedRole={['user', 'admin']}><Credits/></ProtectedRoute>} />
             <Route path="/reports" element={<ProtectedRoute allowedRole={['admin']}><Reports/></ProtectedRoute>}/>
             <Route path="/counts" element={<ProtectedRoute allowedRole={['admin']}><Counts/></ProtectedRoute>}/>
-            <Route path="/billing" element={<ProtectedRoute><Billing/></ProtectedRoute>} />
-            <Route path="/profile" element={<ProtectedRoute><Profile/></ProtectedRoute>} />
+            <Route path="/billing" element={<ProtectedRoute allowedRole={['admin','user']}><Billing/></ProtectedRoute>} />
+            <Route path="/profile" element={<ProtectedRoute allowedRole={['admin','user']}><Profile/></ProtectedRoute>} />
+            <Route path="/promotions" element={<ProtectedRoute allowedRole={['admin']}><Promotion/></ProtectedRoute>} />
           </Route>
 
-          <Route path="/login" element={<Login />} />
           {/* Rutas sin Navbar y Footer */}
           {/* <Route path="/login" element={<Login />} /> */}
 

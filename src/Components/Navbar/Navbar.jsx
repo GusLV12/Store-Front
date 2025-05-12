@@ -69,8 +69,8 @@ export const Navbar = () => {
           <Typography
             variant="h6"
             noWrap
-            component="a"
-            href="#app-bar-with-responsive-menu"
+            component={Link}
+            to="/"
             sx={{
               mr: 2,
               display: { xs: 'none', md: 'flex' },

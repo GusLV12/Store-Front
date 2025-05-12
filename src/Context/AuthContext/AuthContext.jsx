@@ -1,23 +1,47 @@
 import { createContext, useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+import { isTokenExpired } from '@/Utils/jwtDecode';
+
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(() => {
+    const storedUser = localStorage.getItem('user');
+    const storedToken = localStorage.getItem('token');
+
+    if (storedUser && storedToken && !isTokenExpired(storedToken)) {
+      return JSON.parse(storedUser);
+    }
+
+    localStorage.removeItem('user');
+    localStorage.removeItem('token');
+    return null;
+  });
+
   const navigate = useNavigate();
 
   // Función para iniciar sesión
-  const login = (role) => {
-    // Guardar el rol en el estado
-    setUser({ role });
-    // Redirigir después al home
-    navigate('/');
+  const login = ({ user, token }) => {
+
+    isTokenExpired(token);
+    setUser(user);
+
+    localStorage.setItem('user', JSON.stringify(user));
+    localStorage.setItem('token', token);
+
+    if (isTokenExpired(token)) {
+      logout();
+      return;
+    }
+
   };
 
   // Función para cerrar sesión
   const logout = () => {
     setUser(null);
+    localStorage.removeItem('user');
+    localStorage.removeItem('token');
     navigate('/login');
   };
 

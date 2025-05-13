@@ -1,11 +1,15 @@
+import { GlobalModalRenderer } from './Context/ModalContext/GlobalModalRenderer';
+import { ModalProvider } from './Context/ModalContext/ModalContext';
 import { AppRoutes } from './Routes/AppRoutes';
-import { Url } from './Utils/globals.variables';
 
 export const App = () => {
 
   return (
     <>
-      <AppRoutes />
+      <ModalProvider>
+        <AppRoutes />
+        <GlobalModalRenderer />
+      </ModalProvider>
     </>
   );
 };

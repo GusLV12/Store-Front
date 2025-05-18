@@ -2,9 +2,8 @@ import { Button, Grid } from '@mui/material';
 import { useState } from 'react';
 
 import { InputSearch, ProductCard } from '../../Components';
-
-import { useModal } from '@/Context/ModalContext/ModalContext';
-import { ProductOverviewModal } from '@/modals/ProductOverviewModal/ProductOverviewModal';
+import { ProductOverviewModal } from '../../modals/ProductOverviewModal/ProductOverviewModal';
+import { useModal } from '../../Context/ModalContext/ModalContext';
 
 export const Home = () => {
   const [querySearch, setQuerySearch] = useState('');

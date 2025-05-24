@@ -113,12 +113,19 @@ const Collapsed = ({ nestedData }) => {
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
-    backgroundColor: theme.palette.common.black,
-    color: theme.palette.common.white,
-    height: '5rem',
+    backgroundColor: theme.palette.primary.main,
+    color: '#ffffff',
+    fontWeight: 400, // más delgado
+    fontSize: '0.85rem',
+    height: '4rem',
+    borderBottom: `1px solid ${theme.palette.divider}`,
+    letterSpacing: '0.5px',
+    textTransform: 'uppercase',
   },
   [`&.${tableCellClasses.body}`]: {
-    fontSize: 14,
+    fontSize: '0.875rem',
+    fontWeight: 400,
+    color: theme.palette.text.primary,
   },
 }));
 
@@ -149,7 +156,7 @@ export const ComposedTable = ({
   return (
     <TableContainer
       component={Paper}
-      sx={{ borderRadius: '0.4rem', position: 'relative', maxHeight: '180rem', minHeight: '16rem' }}
+      sx={{ borderRadius: '2rem', overflow: 'hidden', position: 'relative', maxHeight: '180rem', minHeight: '16rem',  boxShadow: 3 }}
     >
       <Table aria-label="composed table component" size={size} stickyHeader>
         <TableHead>

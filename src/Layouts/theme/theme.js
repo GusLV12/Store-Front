@@ -3,23 +3,23 @@ import { createTheme } from '@mui/material/styles';
 export const theme = createTheme({
   palette: {
     primary: {
-      main: '#051221', // Azul primario
+      main: '#051221',
     },
     secondary: {
-      main: '#1976D2', // Rojo secundario
+      main: '#1976D2',
     },
     background: {
-      default: '#F5F5F5', // Fondo general blanco
+      default: '#F5F5F5',
     },
     text: {
-      primary: '#333333', // Color de texto principal
-      secondary: '#ffffff', // Color de texto secundario
+      primary: '#333333',
+      secondary: '#ffffff',
     },
     success: {
-      main: '#4CAF50', // Verde para éxito
+      main: '#4CAF50',
     },
     error: {
-      main: '#F44336', // Rojo para error
+      main: '#F44336',
     },
   },
   typography: {
@@ -36,7 +36,48 @@ export const theme = createTheme({
     MuiPaper: {
       styleOverrides: {
         outlined: {
-          borderRadius: '999px', // súper redondeado
+          borderRadius: '999px',
+        },
+      },
+    },
+    MuiTable: {
+      styleOverrides: {
+        root: {
+          borderCollapse: 'separate',
+          borderSpacing: '0 0.5rem',
+        },
+      },
+    },
+    MuiTableHead: {
+      styleOverrides: {
+        root: {
+          backgroundColor: '#ccc',
+          '& th': {
+            fontWeight: 600,
+            fontSize: '0.875rem',
+            color: '#ccc',
+            textTransform: 'uppercase',
+          },
+        },
+      },
+    },
+    MuiTableRow: {
+      styleOverrides: {
+        root: {
+          '&:hover': {
+            backgroundColor: '#e0f7fa',
+          },
+        },
+      },
+    },
+    MuiTableCell: {
+      styleOverrides: {
+        head: {
+          backgroundColor: '#051221',
+          color: '#FFFFFF',
+          fontWeight: 400,
+          fontSize: '0.85rem',
+          textTransform: 'uppercase',
         },
       },
     },

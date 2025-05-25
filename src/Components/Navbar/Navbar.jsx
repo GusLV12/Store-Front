@@ -20,6 +20,10 @@ const pages = [
     url: '/',
   },
   {
+    name: 'Productos',
+    url: '/products',
+  },
+  {
     name: 'Provedores',
     url: '/suppliers',
   },

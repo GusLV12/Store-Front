@@ -1,7 +1,7 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 
 import { MainLayout } from '../Layouts';
-import { Billing, Counts, Credits, Home, Login, Profile, Promotion, Reports, Suppliers } from '../Views';
+import { Billing, Counts, Credits, Home, Login, Products, Profile, Promotion, Reports, Suppliers } from '../Views';
 import { AuthProvider, ProtectedRoute } from '../Context';
 
 export const AppRoutes = () => {
@@ -19,13 +19,14 @@ export const AppRoutes = () => {
             <Route path="/billing" element={<ProtectedRoute allowedRole={['admin','user']}><Billing/></ProtectedRoute>} />
             <Route path="/profile" element={<ProtectedRoute allowedRole={['admin','user']}><Profile/></ProtectedRoute>} />
             <Route path="/promotions" element={<ProtectedRoute allowedRole={['admin']}><Promotion/></ProtectedRoute>} />
+            <Route path="/products" element={<ProtectedRoute allowedRole={['admin']}><Products/></ProtectedRoute>} />
           </Route>
 
           {/* Rutas sin Navbar y Footer */}
-          {/* <Route path="/login" element={<Login />} /> */}
+          <Route path="/login" element={<Login />} />
 
           {/* Página 404 (si la ruta no existe) */}
-          {/* <Route path="*" element={<h1 className="text-center text-3xl">404 - Página no encontrada</h1>} /> */}
+          <Route path="*" element={<h1 className="text-center text-3xl">404 - Página no encontrada</h1>} />
         </Routes>
       </AuthProvider>
     </BrowserRouter>

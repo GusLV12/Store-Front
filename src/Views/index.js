@@ -8,3 +8,4 @@ export * from './Billing/Billing';
 export * from './Profile/Profile';
 export * from './Promotions/Promotion';
 export * from './NotFound/NotFound';
+export * from './products/Products';

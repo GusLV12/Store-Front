@@ -1,5 +1,8 @@
+import { useEffect, useState } from 'react';
 import { Button, Grid } from '@mui/material';
-import { useState } from 'react';
+
+import { useRequest } from '@/Hooks';
+import { getProducts } from '@/api/products';
 
 import { InputSearch, ProductCard } from '../../Components';
 import { ProductOverviewModal } from '../../modals/ProductOverviewModal/ProductOverviewModal';
@@ -8,6 +11,9 @@ import { useModal } from '../../Context/ModalContext/ModalContext';
 export const Home = () => {
   const [querySearch, setQuerySearch] = useState('');
   const { openModal } = useModal();
+
+  // UseRequest de Productos
+  const { makeRequest, response, loading, error } = useRequest(getProducts);
 
   const handleSearchQuery = (query = '') => {
     setQuerySearch(query);
@@ -21,6 +27,10 @@ export const Home = () => {
     console.log('Abriendo modal');
     openModal(<ProductOverviewModal />);
   };
+
+  useEffect(() => {
+    makeRequest();
+  },[]);
 
   return (
     <>

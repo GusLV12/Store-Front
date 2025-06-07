@@ -64,6 +64,10 @@ export default [
     },
     settings: {
       'import/resolver': {
+        alias: {
+          map: [['@', './src']],
+          extensions: ['.js', '.jsx']
+        },
         node: {
           extensions: ['.js', '.jsx'] // 🔹 Permite omitir extensiones en imports
         }

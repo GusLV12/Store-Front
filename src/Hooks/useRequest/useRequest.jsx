@@ -1,8 +1,11 @@
 import { useState } from 'react';
 import axios from 'axios';
 
+import { Url } from '@/Utils/globals.variables';
+import { useAuth } from '@/Context';
+
 const config = {
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3000',
+  baseURL: Url,
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
@@ -14,6 +17,7 @@ export const useRequest = (requestFunction = {}) => {
   const [response, setResponse] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const { user } = useAuth();
 
   const makeRequest = async (data = null) => {
     setLoading(true);
@@ -21,6 +25,10 @@ export const useRequest = (requestFunction = {}) => {
     try {
       const res = await axios({
         ...config,
+        headers:{
+          ...config.headers,
+          Authorization: `token ${user?.storedToken || ''}`,
+        },
         ...requestFunction,
         data,
       });

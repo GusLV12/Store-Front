@@ -1,25 +1,27 @@
 import { Navigate } from 'react-router-dom';
 
+import { isTokenExpired } from '@/Utils/jwtDecode';
+
 import { useAuth } from '../AuthContext/AuthContext';
 
-export const ProtectedRoute = ({ children, allowedRole = 'admin' }) => {
+export const ProtectedRoute = ({ children, allowedRole = '' }) => {
   const { user } = useAuth();
 
-  if(allowedRole === 'all'){
-    return children;
+  // Usuario o token no lo encuentra, redirige a login
+  if (!user) {
+    return <Navigate to="/login" replace />;
   }
-  // Si no está autenticado, redirigir a login
-  // if (!user) {
-  //   // return <Navigate to="/login" replace />;
-  //   return <Navigate to="/" replace />;
-  // }
 
-  // // Si no tiene permiso, redirigir a home
-  // if (!allowedRole.includes(user.role)) {
-  //   // return <Navigate to="/login" replace />;
-  //   return <Navigate to="/" replace />;
-  // }
+  // Token está expirado, redirige a login
+  if (isTokenExpired(user.storedToken)) {
+    return <Navigate to="/login" replace />;
+  }
 
-  // Si el usuario tiene el rol correcto, mostrar la vista
+  // Si el rol no está permitido, redirige al home (o a login si prefieres)
+  if (allowedRole !== 'all' && !allowedRole.includes(user.role)) {
+    return <Navigate to="/" replace />;
+  }
+
+  // ✅ Si todo está bien, renderiza el contenido protegido
   return children;
 };

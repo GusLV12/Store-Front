@@ -4,18 +4,20 @@ import { isTokenExpired } from '@/Utils/jwtDecode';
 
 import { useAuth } from '../AuthContext/AuthContext';
 
-export const ProtectedRoute = ({ children, allowedRole = '' }) => {
+export const ProtectedRoute = ({ children, allowedRole }) => {
   const { user } = useAuth();
 
   // Usuario o token no lo encuentra, redirige a login
   if (!user) {
+    console.log('Usuario no autenticado, redirigiendo a login');
     return <Navigate to="/login" replace />;
   }
 
   // Token está expirado, redirige a login
-  if (isTokenExpired(user.storedToken)) {
-    return <Navigate to="/login" replace />;
-  }
+  // if (isTokenExpired(user.storedToken)) {
+  //   console.log('Token expirado, redirigiendo a login');
+  //   return <Navigate to="/login" replace />;
+  // }
 
   // Si el rol no está permitido, redirige al home (o a login si prefieres)
   if (allowedRole !== 'all' && !allowedRole.includes(user.role)) {

@@ -1,26 +1,42 @@
-import { useState } from 'react';
-import { Button, Checkbox, FormControl, FormLabel, TextField, Typography } from '@mui/material';
+import { useForm } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
+import { Button, FormControl, FormLabel, TextField, Typography } from '@mui/material';
+import { useEffect } from 'react';
+
+import { useRequest } from '@/Hooks';
+import { login as loginApi } from '@/api/login';
 
 import { theme, ThemeLayout } from '../../Layouts';
 import { useAuth } from '../../Context';
 import { SuggestionPrompt } from '../../Components';
+import { schemaLogin, defaultValues } from './validators/login';
 
 export const Login = () => {
   const { login } = useAuth();
-  const [emailError, setEmailError] = useState(false);
-  const [emailErrorMessage, setEmailErrorMessage] = useState('');
-  const [passwordError, setPasswordError] = useState(false);
-  const [passwordErrorMessage, setPasswordErrorMessage] = useState('');
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    if (emailError || passwordError) return;
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isValid, isDirty },
+  } = useForm({
+    defaultValues,
+    resolver: yupResolver(schemaLogin),
+  });
 
-    const data = new FormData(event.currentTarget);
-    console.log({
-      email: data.get('email'),
-      password: data.get('password'),
-    });
+  const { makeRequest } = useRequest(loginApi);
+
+  const onSubmit = async (formData) => {
+
+    console.log('Datos del formulario:', formData);
+    const response = await makeRequest(formData);
+
+    if (!response) {
+      console.error('Error al iniciar sesión');
+      return;
+    }
+
+    // login ya debe manejar setUser, localStorage y redirección
+    login(response);
   };
 
   return (
@@ -28,60 +44,60 @@ export const Login = () => {
       <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-gray-200 to-white dark:from-gray-900 dark:to-black">
         <div className="w-full max-w-md bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
           <Typography variant="h4" className="text-center text-gray-900 dark:text-gray-100">
-            Inicia sesion
+            Inicia sesión
           </Typography>
-          <form onSubmit={handleSubmit} className="mt-4 flex flex-col gap-8">
+          <form onSubmit={handleSubmit(onSubmit)} className="mt-4 flex flex-col gap-8">
             <FormControl>
               <FormLabel htmlFor="email">Email</FormLabel>
               <TextField
-                error={emailError}
-                helperText={emailErrorMessage}
+                {...register('email')}
                 id="email"
                 type="email"
-                name="email"
                 placeholder="your@email.com"
                 autoComplete="email"
                 autoFocus
-                required
                 fullWidth
+                error={!!errors.email}
+                helperText={errors.email?.message}
                 variant="outlined"
                 InputProps={{ style: { color: '#ffff' } }}
-                color={emailError ? 'error' : 'primary'}
-              />
-            </FormControl>
-            <FormControl>
-              <FormLabel htmlFor="password">Password</FormLabel>
-              <TextField
-                error={passwordError}
-                helperText={passwordErrorMessage}
-                name="password"
-                placeholder="••••••"
-                type="password"
-                id="password"
-                autoComplete="current-password"
-                autoFocus
-                required
-                fullWidth
-                variant="outlined"
-                InputProps={{ style: { color: '#ffff' } }}
-                color={passwordError ? 'error' : 'primary'}
               />
             </FormControl>
 
-            <SuggestionPrompt cln="text-white" bgColor={theme.palette.secondary.main}>Ingresa con tu correo y contraseña de empleado.</SuggestionPrompt>
+            <FormControl>
+              <FormLabel htmlFor="password">Password</FormLabel>
+              <TextField
+                {...register('password')}
+                id="password"
+                type="password"
+                placeholder="••••••"
+                autoComplete="current-password"
+                fullWidth
+                error={!!errors.password}
+                helperText={errors.password?.message}
+                variant="outlined"
+                InputProps={{ style: { color: '#ffff' } }}
+              />
+            </FormControl>
+
+            <SuggestionPrompt cln="text-white" bgColor={theme.palette.secondary.main}>
+              Ingresa con tu correo y contraseña de empleado.
+            </SuggestionPrompt>
 
             <Button
               type="submit"
               variant="contained"
               fullWidth
+              onClick={handleSubmit(onSubmit)}
+              disabled={isDirty && !isValid}
               className="bg-blue-600 hover:bg-blue-700 text-white"
-              onClick={() => login('admin')}
             >
               Ingresar
             </Button>
+
             <div className="text-center">
               <a href="/forgot-password" className="text-blue-600 hover:underline">
-                Forgot your password?
+                ¿Olvidaste tu contraseña?
               </a>
             </div>
           </form>

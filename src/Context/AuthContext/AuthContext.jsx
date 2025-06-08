@@ -30,10 +30,12 @@ export const AuthProvider = ({ children }) => {
     localStorage.setItem('user', JSON.stringify(user, null, 2));
     localStorage.setItem('token', token);
 
-    if (isTokenExpired(token)) {
+    if (isTokenExpired(token) || !token) {
       logout();
       return;
     }
+
+    navigate('/');
 
   };
 

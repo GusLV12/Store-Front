@@ -10,6 +10,7 @@ import { useModal } from '../../Context/ModalContext/ModalContext';
 
 export const Home = () => {
   const [querySearch, setQuerySearch] = useState('');
+  const [data, setData] = useState([]);
   const { openModal } = useModal();
 
   // UseRequest de Productos
@@ -32,6 +33,11 @@ export const Home = () => {
     makeRequest();
   },[]);
 
+  useEffect(() => {
+    console.log('Response de productos:', response);
+    setData(response || []);
+  }, [response]);
+
   return (
     <>
       <div className="flex justify-center items-center w-3/5 mx-auto gap-8">
@@ -50,10 +56,28 @@ export const Home = () => {
           Pago
         </Button>
       </div>
-      <Grid container spacing={6} className="m-12">
-        <Grid item xs={12} sm={6} md={4} lg={3}>
-          <ProductCard/>
-        </Grid>
+      <Grid container spacing={2} className="m-12">
+        {data.length > 0 ? (
+          data.map((product) => (
+            <Grid
+              key={product.barcode}
+              item
+              xs={12}
+              md={2}
+            >
+              <ProductCard
+                img={product.image}
+                name={product.name}
+                description={product.description}
+                stock={product.stock}
+              />
+            </Grid>
+          ))
+        ) : (
+          <Grid item xs={12}>
+            <div className="text-center w-full">No hay productos disponibles</div>
+          </Grid>
+        )}
       </Grid>
 
     </>

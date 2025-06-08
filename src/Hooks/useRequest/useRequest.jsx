@@ -18,16 +18,18 @@ export const useRequest = (requestFunction = {}) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const { user } = useAuth();
+  const tokenApi = localStorage.getItem('token');
 
   const makeRequest = async (data = null) => {
     setLoading(true);
     setError(null);
+    console.log('Token en useRequest:', tokenApi);
     try {
       const res = await axios({
         ...config,
         headers:{
           ...config.headers,
-          Authorization: `token ${user?.storedToken || ''}`,
+          Authorization: `Bearer ${tokenApi}`,
         },
         ...requestFunction,
         data,

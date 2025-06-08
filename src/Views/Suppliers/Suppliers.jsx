@@ -1,15 +1,17 @@
-import { memo, useState } from 'react';
+import { memo, useEffect, useState } from 'react';
 import { Grid, Box, Tooltip, Button } from '@mui/material';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import CloudSyncIcon from '@mui/icons-material/CloudSync';
+
+import { useRequest } from '@/Hooks';
+import { getSuppliers } from '@/api/suppliers';
 
 import { ComposedTable, InputSearch } from '../../Components/index';
 
 const tableRowScheme = [
   {
     title: 'Nombre empresa',
-    width: '180px',
-    minWidth: '180px',
+    minWidth: '220px',
   },
   {
     title: 'Nombre contacto',
@@ -40,52 +42,9 @@ const tableRowScheme = [
   },
   {
     title: 'Opciones',
-    minWidth: '260px',
+    minWidth: '100px',
     fixedRight: true,
   },
-];
-
-const dataList = [
-  {
-    companyName: 'Distribuidora El Sol',
-    contactName: 'María López',
-    phone: '555-123-4567',
-    email: 'contacto@elsol.com',
-    address: 'Av. Reforma 123, CDMX',
-    products: 'Abarrotes, Lácteos',
-    status: 'Activo',
-    options: null // Aquí puedes agregar botones o acciones en tu componente de tabla
-  },
-  {
-    companyName: 'Frutas Selectas SA',
-    contactName: 'Carlos Ramírez',
-    phone: '555-765-4321',
-    email: 'ventas@frutasselectas.com',
-    address: 'Calle Naranjo 45, Puebla',
-    products: 'Frutas y Verduras',
-    status: 'Inactivo',
-    options: null
-  },
-  {
-    companyName: 'SuperAlimentos MX',
-    contactName: 'Laura Gómez',
-    phone: '556-987-1234',
-    email: 'laura.gomez@superalimentos.mx',
-    address: 'Boulevard Tecnológico 88, Toluca',
-    products: 'Cereales, Snacks',
-    status: 'Activo',
-    options: null
-  },
-  {
-    companyName: 'Lácteos del Norte',
-    contactName: 'José Hernández',
-    phone: '553-321-9876',
-    email: 'jhernandez@lacteosnorte.com',
-    address: 'Carr. Nacional Km 45, Monterrey',
-    products: 'Queso, Yogur, Leche',
-    status: 'Activo',
-    options: null
-  }
 ];
 
 const OptionButtons = memo(
@@ -100,7 +59,7 @@ const OptionButtons = memo(
               size="small"
               variant="contained"
               color="primary"
-              sx={{ minWidth: '3.2rem', aspectRatio: 1 / 1, padding: '0rem' }}
+              sx={{ minWidth: '3.2rem', aspectRatio: 1 / 1, padding: '0rem', borderRadius: '50%' }}
             >
               <CloudSyncIcon />
             </Button>
@@ -115,7 +74,7 @@ const OptionButtons = memo(
               size="small"
               variant="contained"
               color="error"
-              sx={{ minWidth: '3.2rem', aspectRatio: 1 / 1, padding: '0rem' }}
+              sx={{ minWidth: '3.2rem', aspectRatio: 1 / 1, padding: '0rem', borderRadius: '50%' }}
             >
               <DeleteForeverIcon />
             </Button>
@@ -127,6 +86,18 @@ const OptionButtons = memo(
 
 export const Suppliers = () => {
   const [querySearch, setQuerySearch] = useState('');
+  const [dataList, setDataList] = useState([]);
+
+  const { makeRequest, response, loading } = useRequest(getSuppliers);
+
+  useEffect(() => {
+    makeRequest();
+  },[]);
+
+  useEffect(() => {
+    setDataList(response || []);
+  },[response]);
+
   return (
     <>
       <Grid container spacing={6}>
@@ -146,6 +117,7 @@ export const Suppliers = () => {
               className="w-full"
               headers={tableRowScheme}
               data={dataList}
+              loading={loading}
             >
               <ComposedTable.Column content={({ companyName }) => companyName} />
               <ComposedTable.Column content={({ contactName }) => contactName} />
@@ -155,7 +127,7 @@ export const Suppliers = () => {
               <ComposedTable.Column content={({ products }) => products} />
               <ComposedTable.Column content={({ status }) => status} />
               <ComposedTable.Column
-                content={({ id, status }) => (
+                content={({ id }) => (
                   <OptionButtons
                     onUpdate={() => console.log('Update')}
                     onDelete={() => console.log('Delete')}

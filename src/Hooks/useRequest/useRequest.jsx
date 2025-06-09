@@ -20,19 +20,20 @@ export const useRequest = (requestFunction = {}) => {
   const { user } = useAuth();
   const tokenApi = localStorage.getItem('token');
 
-  const makeRequest = async (data = null) => {
+  const makeRequest = async ({ data = null, params = null } = {}) => {
     setLoading(true);
     setError(null);
-    console.log('Token en useRequest:', tokenApi);
+
     try {
       const res = await axios({
         ...config,
-        headers:{
+        ...requestFunction,
+        headers: {
           ...config.headers,
           Authorization: `Bearer ${tokenApi}`,
         },
-        ...requestFunction,
         data,
+        params,
       });
 
       setResponse(res.data);

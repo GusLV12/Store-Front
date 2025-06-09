@@ -7,6 +7,7 @@ import { useAuth } from '../AuthContext/AuthContext';
 export const ProtectedRoute = ({ children, allowedRole }) => {
   const { user } = useAuth();
   const tokenApi = localStorage.getItem('token');
+  console.log('Token desde ProtectedRoute:', tokenApi);
 
   // Usuario o token no lo encuentra, redirige a login
   if (!user) {
@@ -15,8 +16,10 @@ export const ProtectedRoute = ({ children, allowedRole }) => {
   }
 
   // Token está expirado, redirige a login
-  if (isTokenExpired(tokenApi)) {
+  if (isTokenExpired(tokenApi) || !tokenApi) {
     console.log('Token expirado, redirigiendo a login');
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
     return <Navigate to="/login" replace />;
   }
 

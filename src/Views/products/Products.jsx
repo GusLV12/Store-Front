@@ -3,7 +3,7 @@ import { Grid, Box, Tooltip, Button } from '@mui/material';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import CloudSyncIcon from '@mui/icons-material/CloudSync';
 
-import { useRequest } from '@/Hooks';
+import { useNativeDebounce, useRequest } from '@/Hooks';
 import { getProducts } from '@/api/products';
 
 import { ComposedTable, InputSearch } from '../../Components/index';
@@ -83,16 +83,56 @@ const OptionButtons = memo(
 export const Products = () => {
   const [querySearch, setQuerySearch] = useState('');
   const [dataList, setDataList] = useState([]);
+  const [form, setForm] = useState({
+    search: querySearch,
+    page: 1,
+    limit: 25,
+    total: 0,
+  });
 
   const { makeRequest, response, loading } = useRequest(getProducts);
+
+  const { triggerAction } = useNativeDebounce(5000);
+
+  const handleSearchQuery = async () => {
+    triggerAction().then((isOk) => {
+      if (!isOk) return;
+      makeRequest({ params: form });
+    });
+  };
 
   useEffect(() => {
     makeRequest();
   },[]);
 
   useEffect(() => {
-    setDataList(response || []);
+
+    if(!response) {
+      return;
+    }
+
+    setDataList(response?.data || []);
+    setForm((prev) => ({
+      ...prev,
+      total: response?.total || 0,
+      page: response?.page || 1,
+      limit: response?.limit || 25,
+    }));
   },[response]);
+
+  // -------- Realiza la peticion de datos al haber un cambio en el formulario -----
+  useEffect(() => {
+    if (form === undefined) {
+      return;
+    }
+
+    console.log('FROM | QUERY => ', form);
+    handleSearchQuery();
+  }, [form, querySearch]);
+
+  useEffect(() => {
+
+  }, [querySearch, form]);
 
   return (
     <>

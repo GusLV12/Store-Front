@@ -35,7 +35,7 @@ export const Home = () => {
 
   useEffect(() => {
     console.log('Response de productos:', response);
-    setData(response || []);
+    setData(response?.data || []);
   }, [response]);
 
   return (

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Button, Grid } from '@mui/material';
 
-import { useRequest } from '@/Hooks';
+import { useNativeDebounce, useRequest } from '@/Hooks';
 import { getProducts } from '@/api/products';
 
 import { InputSearch, ProductCard } from '../../Components';
@@ -9,33 +9,63 @@ import { ProductOverviewModal } from '../../modals/ProductOverviewModal/ProductO
 import { useModal } from '../../Context/ModalContext/ModalContext';
 
 export const Home = () => {
-  const [querySearch, setQuerySearch] = useState('');
-  const [data, setData] = useState([]);
   const { openModal } = useModal();
+  const [querySearch, setQuerySearch] = useState('');
+  const [dataList, setDataList] = useState([]);
+  const [form, setForm] = useState({
+    search: querySearch,
+    page: 1,
+    limit: 25,
+    total: 0,
+  });
 
   // UseRequest de Productos
   const { makeRequest, response, loading, error } = useRequest(getProducts);
 
+  const { triggerAction } = useNativeDebounce();
+
+  const handleFilterSearchQuery = async () => {
+    triggerAction().then((isOk) => {
+      if (!isOk) return;
+      makeRequest({ params: form });
+    });
+  };
+
   const handleSearchQuery = (query = '') => {
     setQuerySearch(query);
+    setForm((prev) => ({
+      ...prev,
+      search: query,
+      page: 1,
+    }));
   };
 
   const handleClearAllFilters = () => {
     setQuerySearch('');
   };
 
-  const openDialog = () => {
-    console.log('Abriendo modal');
-    openModal(<ProductOverviewModal />);
-  };
+  const openDialog = () => openModal(<ProductOverviewModal />);
 
   useEffect(() => {
     makeRequest();
+    setDataList(response?.data || []);
+    setForm((prev) => ({
+      ...prev,
+      total: response?.total || 0,
+      page: response?.page || 1,
+      limit: response?.limit || 25,
+    }));
   },[]);
 
+  // Cada vez que cambie querySearch, hacer la búsqueda con debounce
   useEffect(() => {
-    console.log('Response de productos:', response);
-    setData(response?.data || []);
+    handleFilterSearchQuery();
+  }, [querySearch, form.page, form.limit]);
+
+  // Cada vez que llegue una respuesta, actualizar la data
+  useEffect(() => {
+    if (!response) return;
+    setDataList(response?.data || []);
   }, [response]);
 
   return (
@@ -57,8 +87,8 @@ export const Home = () => {
         </Button>
       </div>
       <Grid container spacing={2} className="m-12">
-        {data.length > 0 ? (
-          data.map((product) => (
+        {dataList.length > 0 ? (
+          dataList.map((product) => (
             <Grid
               key={product.barcode}
               item

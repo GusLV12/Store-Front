@@ -103,14 +103,6 @@ export const Products = () => {
 
   useEffect(() => {
     makeRequest();
-  },[]);
-
-  useEffect(() => {
-
-    if(!response) {
-      return;
-    }
-
     setDataList(response?.data || []);
     setForm((prev) => ({
       ...prev,
@@ -118,21 +110,18 @@ export const Products = () => {
       page: response?.page || 1,
       limit: response?.limit || 25,
     }));
-  },[response]);
+  },[]);
 
-  // -------- Realiza la peticion de datos al haber un cambio en el formulario -----
+  // Busqueda filtrada
   useEffect(() => {
-    if (form === undefined) {
-      return;
-    }
-
-    console.log('FROM | QUERY => ', form);
     handleSearchQuery();
-  }, [form, querySearch]);
+  }, [querySearch, form.page, form.limit]);
 
+  // Cada vez que llegue una respuesta, actualizar la data
   useEffect(() => {
-
-  }, [querySearch, form]);
+    if (!response) return;
+    setDataList(response?.data || []);
+  }, [response]);
 
   return (
     <>

@@ -207,7 +207,7 @@ export const ComposedTable = ({
       </Table>
       {!data.length > 0 && !isLoading && (
         <div
-          className="bg-slate-950 h-full w-full left-0 top-0 bg-opacity-50 flex flex-auto justify-center items-end"
+          className="h-full w-full left-0 top-0 bg-opacity-50 flex flex-auto justify-center items-end"
           style={{ position: 'absolute' }}
         >
           <div className="mt-16 mb-24">

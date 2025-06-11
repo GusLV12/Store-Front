@@ -94,34 +94,38 @@ export const Products = () => {
 
   const { triggerAction } = useNativeDebounce(5000);
 
-  const handleSearchQuery = async () => {
+  // Ejecuta cuando cambia search, page o limit
+  useEffect(() => {
+    handleFilterSearchQuery();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [form.search, form.page, form.limit]);
+
+  // Actualiza dataList y total solo cuando llega nueva respuesta
+  useEffect(() => {
+    if (!response) return;
+    setDataList(response.data || []);
+    setForm((prev) => ({
+      ...prev,
+      total: response.total ?? prev.total,
+    }));
+  }, [response]);
+
+  const handleFilterSearchQuery = async () => {
     triggerAction().then((isOk) => {
       if (!isOk) return;
       makeRequest({ params: form });
     });
   };
 
-  useEffect(() => {
-    makeRequest();
-    setDataList(response?.data || []);
+  // Actualiza el input de búsqueda y el filtro (resetea a página 1)
+  const handleSearchQuery = (query = '') => {
+    setQuerySearch(query);
     setForm((prev) => ({
       ...prev,
-      total: response?.total || 0,
-      page: response?.page || 1,
-      limit: response?.limit || 25,
+      search: query,
+      page: 1,
     }));
-  },[]);
-
-  // Busqueda filtrada
-  useEffect(() => {
-    handleSearchQuery();
-  }, [querySearch, form.page, form.limit]);
-
-  // Cada vez que llegue una respuesta, actualizar la data
-  useEffect(() => {
-    if (!response) return;
-    setDataList(response?.data || []);
-  }, [response]);
+  };
 
   return (
     <>
@@ -132,7 +136,7 @@ export const Products = () => {
               className="my-6 w-4/5"
               placeholder="Escribe un nombre para buscar contacto"
               value={querySearch}
-              onChange={(query) => setQuerySearch(query)}
+              onChange={handleSearchQuery}
             />
           </Box>
         </Grid>
@@ -142,7 +146,7 @@ export const Products = () => {
               className="w-full"
               headers={tableRowScheme}
               data={dataList}
-              loading={loading}
+              isLoading={loading}
             >
               <ComposedTable.Column content={({ barcode }) => barcode} />
               <ComposedTable.Column content={({ name }) => name} />

@@ -7,7 +7,7 @@ import { useAuth } from '../AuthContext/AuthContext';
 export const ProtectedRoute = ({ children, allowedRole }) => {
   const { user } = useAuth();
   const tokenApi = localStorage.getItem('token');
-  console.log('Token desde ProtectedRoute:', tokenApi);
+  // console.log('Token desde ProtectedRoute:', tokenApi);
 
   // Usuario o token no lo encuentra, redirige a login
   if (!user) {

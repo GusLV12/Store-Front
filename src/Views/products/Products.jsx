@@ -2,11 +2,12 @@ import { memo, useEffect, useState } from 'react';
 import { Grid, Box, Tooltip, Button } from '@mui/material';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import CloudSyncIcon from '@mui/icons-material/CloudSync';
+import EditIcon from '@mui/icons-material/Edit';
 
 import { useNativeDebounce, useRequest } from '@/Hooks';
 import { getProducts } from '@/api/products';
 
-import { ComposedTable, InputSearch } from '../../Components/index';
+import { ComposedTable, InputSearch, Paginator } from '../../Components/index';
 
 const tableRowScheme = [
   {
@@ -47,7 +48,7 @@ const OptionButtons = memo(
   ({ onUpdate = () => {}, onDelete = () => {} }) => {
     return (
       <div className="flex w-full flex-wrap flex-row justify-between items-center">
-        <Tooltip title="Reiniciar registro de terminal">
+        <Tooltip title="Editar producto">
           <span>
             <Button
               className="my-3"
@@ -57,12 +58,12 @@ const OptionButtons = memo(
               color="primary"
               sx={{ minWidth: '3.2rem', aspectRatio: 1 / 1, padding: '0rem', borderRadius: '50%' }}
             >
-              <CloudSyncIcon />
+              <EditIcon />
             </Button>
           </span>
         </Tooltip>
 
-        <Tooltip title="Eliminar informacion de registro de terminal">
+        <Tooltip title="Eliminar producto">
           <span>
             <Button
               className="my-3"
@@ -92,7 +93,7 @@ export const Products = () => {
 
   const { makeRequest, response, loading } = useRequest(getProducts);
 
-  const { triggerAction } = useNativeDebounce(5000);
+  const { triggerAction } = useNativeDebounce(600);
 
   // Ejecuta cuando cambia search, page o limit
   useEffect(() => {
@@ -103,6 +104,7 @@ export const Products = () => {
   // Actualiza dataList y total solo cuando llega nueva respuesta
   useEffect(() => {
     if (!response) return;
+    console.log('Response received:', response);
     setDataList(response.data || []);
     setForm((prev) => ({
       ...prev,
@@ -127,6 +129,21 @@ export const Products = () => {
     }));
   };
 
+  const handleChangePage = (page) => {
+    setForm((prev) => ({
+      ...prev,
+      page: page,
+    }));
+  };
+
+  const handleChangeItems = (items) => {
+    setForm((prev) => ({
+      ...prev,
+      limit: items,
+      page: 1,
+    }));
+  };
+
   return (
     <>
       <Grid container spacing={6}>
@@ -141,6 +158,32 @@ export const Products = () => {
           </Box>
         </Grid>
         <Grid item xs={12}>
+          <Grid container spacing={1} className="p-2">
+            <Grid item xs={12} className="p-8 mb-24">
+              <div className="flex flex-row w-full justify-end">
+                <div className="mx-10 my-2 md:my-0 justify-center items-center flex">
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    size="medium"
+                    fullWidth
+                    onClick={() => console.log('Agregar producto')}
+                  >
+                    Agregar producto
+                  </Button>
+                </div>
+
+                <Paginator
+                  totalPages={form.total}
+                  totalItems={form.limit}
+                  onChangeCurrentPage={(page) => handleChangePage(page)}
+                  onChangeItemsPerPage={(items) => handleChangeItems(items)}
+                  currentPage={form.page}
+                  currentItemsPerPage={form.limit}
+                />
+              </div>
+            </Grid>
+          </Grid>
           <div className="flex flex-col justify-center">
             <ComposedTable
               className="w-full"
@@ -163,7 +206,20 @@ export const Products = () => {
                 )}
               />
             </ComposedTable>
-
+            <Grid container spacing={1} className="p-2 mt-24 flex">
+              <Grid item xs={12} md={12} className="py-8">
+                <div className="flex flex-row justify-end">
+                  <Paginator
+                    totalPages={form.total}
+                    totalItems={form.limit}
+                    onChangeCurrentPage={(page) => handleChangePage(page)}
+                    onChangeItemsPerPage={(items) => handleChangeItems(items)}
+                    currentPage={form.page}
+                    currentItemsPerPage={form.limit}
+                  />
+                </div>
+              </Grid>
+            </Grid>
           </div>
         </Grid>
       </Grid>

@@ -2,11 +2,12 @@ import { memo, useEffect, useState } from 'react';
 import { Grid, Box, Tooltip, Button } from '@mui/material';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import CloudSyncIcon from '@mui/icons-material/CloudSync';
+import EditIcon from '@mui/icons-material/Edit';
 
-import { useRequest } from '@/Hooks';
+import { useNativeDebounce, useRequest } from '@/Hooks';
 import { getSuppliers } from '@/api/suppliers';
 
-import { ComposedTable, InputSearch } from '../../Components/index';
+import { ComposedTable, InputSearch, Paginator } from '../../Components/index';
 
 const tableRowScheme = [
   {
@@ -51,7 +52,7 @@ const OptionButtons = memo(
   ({ onUpdate = () => {}, onDelete = () => {} }) => {
     return (
       <div className="flex w-full flex-wrap flex-row justify-between items-center">
-        <Tooltip title="Reiniciar registro de terminal">
+        <Tooltip title="Editar provedor">
           <span>
             <Button
               className="my-3"
@@ -61,12 +62,12 @@ const OptionButtons = memo(
               color="primary"
               sx={{ minWidth: '3.2rem', aspectRatio: 1 / 1, padding: '0rem', borderRadius: '50%' }}
             >
-              <CloudSyncIcon />
+              <EditIcon />
             </Button>
           </span>
         </Tooltip>
 
-        <Tooltip title="Eliminar informacion de registro de terminal">
+        <Tooltip title="Eliminar provedor">
           <span>
             <Button
               className="my-3"
@@ -87,16 +88,66 @@ const OptionButtons = memo(
 export const Suppliers = () => {
   const [querySearch, setQuerySearch] = useState('');
   const [dataList, setDataList] = useState([]);
+  const [form, setForm] = useState({
+    search: querySearch,
+    page: 1,
+    limit: 25,
+    total: 0,
+  });
 
+  // Consumiendo endpoints
   const { makeRequest, response, loading } = useRequest(getSuppliers);
 
-  useEffect(() => {
-    makeRequest();
-  },[]);
+  const { triggerAction } = useNativeDebounce(600);
 
+  // Ejecuta cuando cambia search, page o limit
   useEffect(() => {
-    setDataList(response || []);
-  },[response]);
+    handleFilterSearchQuery();
+
+  }, [form.search, form.page, form.limit]);
+
+  // Actualiza dataList y total solo cuando llega nueva respuesta
+  useEffect(() => {
+    if (!response) return;
+    console.log('Response received:', response);
+    setDataList(response.data || []);
+    setForm((prev) => ({
+      ...prev,
+      total: response.total ?? prev.total,
+    }));
+  }, [response]);
+
+  const handleFilterSearchQuery = async () => {
+    triggerAction().then((isOk) => {
+      if (!isOk) return;
+      makeRequest({ params: form });
+    });
+  };
+
+  // Actualiza el input de búsqueda y el filtro (resetea a página 1)
+  const handleSearchQuery = (query = '') => {
+    setQuerySearch(query);
+    setForm((prev) => ({
+      ...prev,
+      search: query,
+      page: 1,
+    }));
+  };
+
+  const handleChangePage = (page) => {
+    setForm((prev) => ({
+      ...prev,
+      page: page,
+    }));
+  };
+
+  const handleChangeItems = (items) => {
+    setForm((prev) => ({
+      ...prev,
+      limit: items,
+      page: 1,
+    }));
+  };
 
   return (
     <>
@@ -112,6 +163,32 @@ export const Suppliers = () => {
           </Box>
         </Grid>
         <Grid item xs={12}>
+          <Grid container spacing={1} className="p-2">
+            <Grid item xs={12} className="p-8 mb-24">
+              <div className="flex flex-row w-full justify-end">
+                <div className="mx-10 my-2 md:my-0 justify-center items-center flex">
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    size="medium"
+                    fullWidth
+                    onClick={() => console.log('Agregar producto')}
+                  >
+                              Agregar producto
+                  </Button>
+                </div>
+
+                <Paginator
+                  totalPages={form.total}
+                  totalItems={form.limit}
+                  onChangeCurrentPage={(page) => handleChangePage(page)}
+                  onChangeItemsPerPage={(items) => handleChangeItems(items)}
+                  currentPage={form.page}
+                  currentItemsPerPage={form.limit}
+                />
+              </div>
+            </Grid>
+          </Grid>
           <div className="flex flex-col justify-center">
             <ComposedTable
               className="w-full"
@@ -135,7 +212,20 @@ export const Suppliers = () => {
                 )}
               />
             </ComposedTable>
-
+            <Grid container spacing={1} className="p-2 mt-24 flex">
+              <Grid item xs={12} md={12} className="py-8">
+                <div className="flex flex-row justify-end">
+                  <Paginator
+                    totalPages={form.total}
+                    totalItems={form.limit}
+                    onChangeCurrentPage={(page) => handleChangePage(page)}
+                    onChangeItemsPerPage={(items) => handleChangeItems(items)}
+                    currentPage={form.page}
+                    currentItemsPerPage={form.limit}
+                  />
+                </div>
+              </Grid>
+            </Grid>
           </div>
         </Grid>
       </Grid>

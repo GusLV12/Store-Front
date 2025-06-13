@@ -61,7 +61,7 @@ export const Paginator = ({
         </Grid>
         <Grid item xs={12} sm={6}>
           <div
-            className="flex flex-row justify-center sm:justify-start items-center h-full items-center pt-16 pb-8 sm:pt-0 sm:pb-0"
+            className="flex flex-row justify-center sm:justify-start h-full items-center pt-16 pb-8 sm:pt-0 sm:pb-0 px-8"
           >
             <Pagination size="small" siblingCount={0} page={currentPage} count={totalPages} onChange={handleChangePage} />
           </div>

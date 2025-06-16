@@ -3,6 +3,7 @@ import { Grid, Box, Tooltip, Button } from '@mui/material';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import CloudSyncIcon from '@mui/icons-material/CloudSync';
 import EditIcon from '@mui/icons-material/Edit';
+import { useNavigate } from 'react-router-dom';
 
 import { useNativeDebounce, useRequest } from '@/Hooks';
 import { getProducts } from '@/api/products';
@@ -91,6 +92,9 @@ export const Products = () => {
     total: 0,
   });
 
+  // Navegacion a ritas hijas
+  const navigate = useNavigate();
+
   const { makeRequest, response, loading } = useRequest(getProducts);
 
   const { triggerAction } = useNativeDebounce(600);
@@ -144,6 +148,11 @@ export const Products = () => {
     }));
   };
 
+  const handleCreate = () => {
+    console.log('Haciendo clic en crear producto');
+    navigate('/products/create');
+  };
+
   return (
     <>
       <Grid container spacing={6}>
@@ -155,23 +164,23 @@ export const Products = () => {
               value={querySearch}
               onChange={handleSearchQuery}
             />
+            <div className="px-4 py-4">
+              <Button
+                className="whitespace-nowrap mx-4"
+                variant="contained"
+                color="primary"
+                onClick={handleCreate}
+              // startIcon={<GroupAddIcon />}
+              >
+              Agregar producto
+              </Button>
+            </div>
           </Box>
         </Grid>
         <Grid item xs={12}>
           <Grid container spacing={1} className="p-2">
             <Grid item xs={12} className="p-8 mb-24">
               <div className="flex flex-row w-full justify-end">
-                <div className="mx-10 my-2 md:my-0 justify-center items-center flex">
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    size="medium"
-                    fullWidth
-                    onClick={() => console.log('Agregar producto')}
-                  >
-                    Agregar producto
-                  </Button>
-                </div>
 
                 <Paginator
                   totalPages={form.total}

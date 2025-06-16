@@ -1,7 +1,9 @@
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { Button, FormControl, FormLabel, TextField, Typography } from '@mui/material';
-import { useEffect } from 'react';
+import {  useState } from 'react';
+import { IconButton, InputAdornment } from '@mui/material';
+import { Visibility, VisibilityOff } from '@mui/icons-material';
 
 import { useRequest } from '@/Hooks';
 import { login as loginApi } from '@/api/login';
@@ -13,6 +15,11 @@ import { schemaLogin, defaultValues } from './validators/login';
 
 export const Login = () => {
   const { login } = useAuth();
+  const [showPassword, setShowPassword] = useState(false);
+
+  // funciones password
+  const handleClickShowPassword = () => setShowPassword((show) => !show);
+  const handleMouseDownPassword = (event) => event.preventDefault();
 
   const {
     register,
@@ -69,14 +76,28 @@ export const Login = () => {
               <TextField
                 {...register('password')}
                 id="password"
-                type="password"
+                type={showPassword ? 'text' : 'password'}
                 placeholder="••••••"
                 autoComplete="current-password"
                 fullWidth
                 error={!!errors.password}
                 helperText={errors.password?.message}
                 variant="outlined"
-                InputProps={{ style: { color: '#ffff' } }}
+                InputProps={{
+                  style: { color: '#ffff' },
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton
+                        aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                        onClick={handleClickShowPassword}
+                        onMouseDown={handleMouseDownPassword}
+                        edge="end"
+                      >
+                        {showPassword ? <VisibilityOff sx={{ fill: 'white' }}/> : <Visibility sx={{ fill: 'white' }}/>}
+                      </IconButton>
+                    </InputAdornment>
+                  )
+                }}
               />
             </FormControl>
 

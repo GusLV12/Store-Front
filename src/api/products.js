@@ -1,7 +1,7 @@
-export const getProducts = {
+export const getProducts = () => ({
   method: 'GET',
   url: 'products',
-};
+});
 
 export const getProductById = (id) => ({
   method: 'GET',

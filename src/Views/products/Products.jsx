@@ -6,9 +6,11 @@ import EditIcon from '@mui/icons-material/Edit';
 import { useNavigate } from 'react-router-dom';
 
 import { useNativeDebounce, useRequest } from '@/Hooks';
-import { getProducts } from '@/api/products';
+import { deleteProduct, getProducts } from '@/api/products';
+import { useModal } from '@/Context/ModalContext/ModalContext';
+import { ProductOverviewModal } from '@/modals/ProductOverviewModal/ProductOverviewModal';
 
-import { ComposedTable, InputSearch, Paginator } from '../../Components/index';
+import { ComposedTable, DeleteModal, InputSearch, Paginator } from '../../Components/index';
 
 const tableRowScheme = [
   {
@@ -83,6 +85,7 @@ const OptionButtons = memo(
   });
 
 export const Products = () => {
+  const { openModal, closeModal, } = useModal();
   const [querySearch, setQuerySearch] = useState('');
   const [dataList, setDataList] = useState([]);
   const [form, setForm] = useState({
@@ -96,8 +99,24 @@ export const Products = () => {
   const navigate = useNavigate();
 
   const { makeRequest, response, loading } = useRequest(getProducts);
+  const { makeRequest: tryDeleteProduct } = useRequest(deleteProduct);
 
   const { triggerAction } = useNativeDebounce(600);
+
+  // Modal de eliminar
+  const handleDelete = (id) => openModal(
+    <DeleteModal
+      open
+      onClose={(wasDeleted) => {
+        closeModal();
+        if (wasDeleted) {
+          handleFilterSearchQuery();
+        }
+      }}
+      id={id}
+      descripcion="¿Seguro que deseas eliminar este producto?"
+      makeRequest={() => tryDeleteProduct(id)}
+    />);
 
   // Ejecuta cuando cambia search, page o limit
   useEffect(() => {
@@ -151,6 +170,10 @@ export const Products = () => {
   const handleCreate = () => {
     console.log('Haciendo clic en crear producto');
     navigate('/products/create');
+  };
+
+  const handleUpdate = (id) => {
+    navigate(`/products/edit/${id}`);
   };
 
   return (
@@ -209,8 +232,8 @@ export const Products = () => {
               <ComposedTable.Column
                 content={({ id }) => (
                   <OptionButtons
-                    onUpdate={() => console.log('Update')}
-                    onDelete={() => console.log('Delete')}
+                    onUpdate={() => handleUpdate(id)}
+                    onDelete={() => handleDelete(id)}
                   />
                 )}
               />

@@ -6,3 +6,4 @@ export * from './ComposedTable/ComposedTable';
 export * from './ButtonWithExpand/ButtonWithExpand';
 export * from './Paginator/Paginator';
 export * from './TextWithLabel/TextWithLabel';
+export * from './DeleteModal/DeleteModal';

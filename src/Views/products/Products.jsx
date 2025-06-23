@@ -95,7 +95,7 @@ export const Products = () => {
     total: 0,
   });
 
-  // Navegacion a ritas hijas
+  // Navegacion a rutas hijas
   const navigate = useNavigate();
 
   const { makeRequest, response, loading } = useRequest(getProducts);
@@ -168,7 +168,6 @@ export const Products = () => {
   };
 
   const handleCreate = () => {
-    console.log('Haciendo clic en crear producto');
     navigate('/products/create');
   };
 
@@ -193,7 +192,6 @@ export const Products = () => {
                 variant="contained"
                 color="primary"
                 onClick={handleCreate}
-              // startIcon={<GroupAddIcon />}
               >
               Agregar producto
               </Button>

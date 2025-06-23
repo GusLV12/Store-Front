@@ -102,7 +102,7 @@ export const Home = () => {
                 key={product.barcode}
                 item
                 xs={12}
-                md={2}
+                md={4}
               >
                 <ProductCard
                   img={product.image}

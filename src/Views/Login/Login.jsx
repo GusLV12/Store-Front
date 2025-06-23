@@ -35,7 +35,7 @@ export const Login = () => {
   const onSubmit = async (formData) => {
 
     console.log('Datos del formulario:', formData);
-    const response = await makeRequest({ data: formData });
+    const response = await makeRequest( formData);
 
     if (!response) {
       console.error('Error al iniciar sesión');

@@ -138,7 +138,7 @@ export const Products = () => {
   const handleFilterSearchQuery = async () => {
     triggerAction().then((isOk) => {
       if (!isOk) return;
-      makeRequest({ params: form });
+      makeRequest( form );
     });
   };
 

@@ -26,6 +26,7 @@ import { schemaProduct, defaultValues } from './validators/create';
 export function CreateProduct() {
   const navigate = useNavigate();
   const [submitting, setSubmitting] = useState(false);
+  const [formKey, setFormKey] = useState(Date.now());
 
   const {
     control,
@@ -33,7 +34,7 @@ export function CreateProduct() {
     formState: { errors, isValid, dirtyFields },
     reset,
   } = useForm({
-    defaultValues: { ...defaultValues, status: true },
+    defaultValues: { ...defaultValues },
     resolver: yupResolver(schemaProduct),
     mode: 'onChange',
   });
@@ -109,6 +110,7 @@ export function CreateProduct() {
   // --- SUBMIT global ---
   const onSubmit = async (data) => {
     setSubmitting(true);
+    console.log('Datos del formulario:', data);
     try {
       // 1. Resuelve departamento
       const departmentId = await handleCreateDepartment(data.departmentId);
@@ -127,7 +129,10 @@ export function CreateProduct() {
       await tryCreateProduct(productToSend);
 
       alert(`Producto creado:\n${JSON.stringify(productToSend, null, 2)}`);
-      reset();
+      reset({
+        ...defaultValues,
+      });
+      setFormKey(Date.now());
     } catch (err) {
       alert('Error al crear el producto');
       console.error(err);
@@ -173,7 +178,7 @@ export function CreateProduct() {
         >
           Agregar producto
         </Typography>
-        <form onSubmit={handleSubmit(onSubmit)} autoComplete="off">
+        <form key={formKey} onSubmit={handleSubmit(onSubmit)} autoComplete="off">
           {/* Nombre */}
           <Box mb={2}>
             <Typography variant="subtitle1" fontWeight={500} mb={0.5}>

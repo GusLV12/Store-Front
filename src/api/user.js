@@ -1,24 +1,24 @@
 export const getUsers = {
   method: 'GET',
-  url: 'user',
+  url: 'users',
 };
 
 export const createUser = {
   method: 'POST',
-  url: 'user',
+  url: 'users',
 };
 
 export const getUserByID = {
   method: 'GET',
-  url: 'user/:id',
+  url: 'users/:id',
 };
 
 export const updateUser = {
   method: 'PUT',
-  url: 'user',
+  url: 'users',
 };
 
 export const deleteUser = {
   method: 'DELETE',
-  url: 'user',
+  url: 'users',
 };

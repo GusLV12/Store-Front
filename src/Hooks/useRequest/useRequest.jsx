@@ -1,3 +1,4 @@
+// useRequest.jsx
 import { useState } from 'react';
 import axios from 'axios';
 
@@ -13,27 +14,34 @@ const config = {
   },
 };
 
-export const useRequest = (requestFunction = {}) => {
+// El hook ahora acepta opcionalmente una función que retorne el requestConfig
+export const useRequest = (requestFactory) => {
   const [response, setResponse] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const { user } = useAuth();
   const tokenApi = localStorage.getItem('token');
 
-  const makeRequest = async ({ data = null, params = null } = {}) => {
+  // Ahora makeRequest puede recibir los argumentos que necesita el factory
+  const makeRequest = async (...args) => {
     setLoading(true);
     setError(null);
-
     try {
+      // Si requestFactory es función, la ejecutas, si es objeto, lo usas directo
+      const requestConfig =
+        typeof requestFactory === 'function'
+          ? requestFactory(...args)
+          : requestFactory;
+
       const res = await axios({
         ...config,
-        ...requestFunction,
+        ...requestConfig,
         headers: {
           ...config.headers,
           Authorization: `Bearer ${tokenApi}`,
         },
-        data,
-        params,
+        // Si mandas data/params por props en tu objeto, sigue funcionando
+        ...requestConfig,
       });
 
       setResponse(res.data);

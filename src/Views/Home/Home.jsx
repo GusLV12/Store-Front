@@ -43,20 +43,13 @@ export const Home = () => {
   const openDialog = () => openModal(<ProductOverviewModal />);
 
   // Carga inicial de productos (sin debounce)
-  useEffect(() => {
-    makeRequest({ params: form });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
-  // Carga productos cuando cambia search, page o limit (con debounce)
   useEffect(() => {
-
     triggerAction().then((isOk) => {
       if (!isOk) return;
       makeRequest({ params: form });
     });
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [form.search, form.page, form.limit]);
 
   // Actualiza dataList y total cuando llega la respuesta
@@ -77,7 +70,6 @@ export const Home = () => {
     );
   }
 
-  const les = true;
   return (
     <>
       <div className="flex justify-center items-center w-3/5 mx-auto gap-8">
@@ -110,7 +102,7 @@ export const Home = () => {
                 key={product.barcode}
                 item
                 xs={12}
-                md={2}
+                md={4}
               >
                 <ProductCard
                   img={product.image}

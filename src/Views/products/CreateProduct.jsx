@@ -11,38 +11,134 @@ import {
   Paper,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+
+import { useRequest } from '@/Hooks';
+import { createType, getTypes } from '@/api/types';
+import { createDepartment, getDepartments } from '@/api/departments';
+// import { createProduct } from '@/api/products';
+
+import { catalogSuppliers } from '@/api/suppliers';
+import { createProduct } from '@/api/products';
 
 import { schemaProduct, defaultValues } from './validators/create';
 
-const suppliers = [
-  { label: 'Proveedor 1', id: 'abc-123' },
-  { label: 'Proveedor 2', id: 'xyz-789' }
-];
-const departments = [
-  { label: 'Abarrotes', id: 'dept-1' },
-  { label: 'Bebidas', id: 'dept-2' }
-];
-const types = [
-  { label: 'Botella', id: 'type-1' },
-  { label: 'Lata', id: 'type-2' }
-];
-
 export function CreateProduct() {
   const navigate = useNavigate();
+  const [submitting, setSubmitting] = useState(false);
+  const [formKey, setFormKey] = useState(Date.now());
+
   const {
     control,
     handleSubmit,
     formState: { errors, isValid, dirtyFields },
     reset,
   } = useForm({
-    defaultValues: { ...defaultValues, status: true },
+    defaultValues: { ...defaultValues },
     resolver: yupResolver(schemaProduct),
     mode: 'onChange',
   });
 
-  const onSubmit = (data) => {
-    alert(`Producto creado:\n${  JSON.stringify(data, null, 2)}`);
-    reset();
+  // Obtener catálogos
+  const { makeRequest: tryGetTypes, response: dataTypes = [] } = useRequest(getTypes);
+  const { makeRequest: tryGetDepartments, response: dataDepartments = [] } = useRequest(getDepartments);
+  const { makeRequest: tryGetSuppliers, response: dataSuppliers } = useRequest(catalogSuppliers);
+
+  // Para crear tipo y depto
+  const { makeRequest: tryCreateType } = useRequest(createType);
+  const { makeRequest: tryCreateDepartment } = useRequest(createDepartment);
+
+  // Si tienes la función, descomenta para crear producto en la API real:
+  const { makeRequest: tryCreateProduct } = useRequest(createProduct);
+
+  useEffect(() => {
+    tryGetTypes();
+    tryGetDepartments();
+    tryGetSuppliers();
+  }, []);
+
+  // --- Lógica central para tipo ---
+  const handleCreateType = async (nameOrId) => {
+    // 1. Buscar si es un id ya existente
+    const foundById = dataTypes?.find((item) => item.id === nameOrId);
+    if (foundById) return foundById.id;
+
+    // 2. Buscar si es un nombre (insensible a mayúsculas)
+    const foundByName = dataTypes?.find(
+      (item) => item.name.toLowerCase() === nameOrId.toLowerCase()
+    );
+    if (foundByName) return foundByName.id;
+
+    // 3. Si no existe, créalo y regresa su id
+    try {
+      const created = await tryCreateType({ name: nameOrId });
+      if (created && created.id) {
+        await tryGetTypes();
+        return created.id;
+      }
+    } catch (error) {
+      console.error('Error al crear el tipo:', error);
+    }
+    return null;
+  };
+
+  // --- Lógica central para departamento ---
+  const handleCreateDepartment = async (nameOrId) => {
+    // 1. Buscar si es un id ya existente
+    const foundById = dataDepartments?.find((item) => item.id === nameOrId);
+    if (foundById) return foundById.id;
+
+    // 2. Buscar si es un nombre (insensible a mayúsculas)
+    const foundByName = dataDepartments?.find(
+      (item) => item.name.toLowerCase() === nameOrId.toLowerCase()
+    );
+    if (foundByName) return foundByName.id;
+
+    // 3. Si no existe, créalo y regresa su id
+    try {
+      const created = await tryCreateDepartment({ name: nameOrId });
+      if (created && created.id) {
+        await tryGetDepartments(); // refresca catálogo
+        return created.id;
+      }
+    } catch (error) {
+      console.error('Error al crear el departamento:', error);
+    }
+    return null;
+  };
+
+  // --- SUBMIT global ---
+  const onSubmit = async (data) => {
+    setSubmitting(true);
+    console.log('Datos del formulario:', data);
+    try {
+      // 1. Resuelve departamento
+      const departmentId = await handleCreateDepartment(data.departmentId);
+
+      // 2. Resuelve tipo
+      const typeId = await handleCreateType(data.typeId);
+
+      // 3. Arma data final (ajusta nombres según tu backend)
+      const productToSend = {
+        ...data,
+        departmentId,
+        typeId,
+      };
+
+      // 4. Aquí puedes guardar en la API real:
+      await tryCreateProduct(productToSend);
+
+      alert(`Producto creado:\n${JSON.stringify(productToSend, null, 2)}`);
+      reset({
+        ...defaultValues,
+      });
+      setFormKey(Date.now());
+    } catch (err) {
+      alert('Error al crear el producto');
+      console.error(err);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const handleViewRoute = () => {
@@ -82,7 +178,7 @@ export function CreateProduct() {
         >
           Agregar producto
         </Typography>
-        <form onSubmit={handleSubmit(onSubmit)} autoComplete="off">
+        <form key={formKey} onSubmit={handleSubmit(onSubmit)} autoComplete="off">
           {/* Nombre */}
           <Box mb={2}>
             <Typography variant="subtitle1" fontWeight={500} mb={0.5}>
@@ -189,8 +285,8 @@ export function CreateProduct() {
               control={control}
               render={({ field }) => (
                 <Autocomplete
-                  options={suppliers}
-                  getOptionLabel={(option) => option.label}
+                  options={dataSuppliers}
+                  getOptionLabel={(option) => option.companyName}
                   onChange={(_, value) => field.onChange(value ? value.id : '')}
                   renderInput={(params) => (
                     <TextField
@@ -209,33 +305,6 @@ export function CreateProduct() {
           {/* Departamento */}
           <Box mb={2}>
             <Typography variant="subtitle1" fontWeight={500} mb={0.5}>
-              Departamento *
-            </Typography>
-            <Controller
-              name="departmentId"
-              control={control}
-              render={({ field }) => (
-                <Autocomplete
-                  options={departments}
-                  getOptionLabel={(option) => option.label}
-                  onChange={(_, value) => field.onChange(value ? value.id : '')}
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      placeholder="Selecciona departamento"
-                      error={!!errors.departmentId}
-                      helperText={errors?.departmentId?.message}
-                      variant="outlined"
-                      sx={{ borderRadius: 2 }}
-                    />
-                  )}
-                />
-              )}
-            />
-          </Box>
-          {/* Tipo */}
-          <Box mb={2}>
-            <Typography variant="subtitle1" fontWeight={500} mb={0.5}>
               Tipo de producto *
             </Typography>
             <Controller
@@ -243,13 +312,49 @@ export function CreateProduct() {
               control={control}
               render={({ field }) => (
                 <Autocomplete
-                  options={types}
-                  getOptionLabel={(option) => option.label}
-                  onChange={(_, value) => field.onChange(value ? value.id : '')}
-                  renderInput={(params) => (
+                  options={dataTypes || []}
+                  getOptionLabel={option =>
+                    typeof option === 'string'
+                      ? option
+                      : option?.name || ''
+                  }
+                  isOptionEqualToValue={(option, value) =>
+                    option.id === value || option.name === value
+                  }
+                  value={
+                    dataTypes?.find(type => type.id === field.value) ||
+        (field.value ? { id: null, name: field.value } : null)
+                  }
+                  freeSolo
+                  onChange={async (_, value) => {
+                    if (value && value.id) {
+                      field.onChange(value.id);
+                      return;
+                    }
+                    if (typeof value === 'string' && value.trim().length > 0) {
+                      const alreadyExists = dataTypes?.some(
+                        type => type.name.trim().toLowerCase() === value.trim().toLowerCase()
+                      );
+                      if (!alreadyExists) {
+                        const createdId = await handleCreateType(value);
+                        if (createdId) {
+                          field.onChange(createdId);
+                          await tryGetTypes();
+                          return;
+                        }
+                      }
+                      const type = dataTypes.find(
+                        type => type.name.trim().toLowerCase() === value.trim().toLowerCase()
+                      );
+                      if (type) field.onChange(type.id);
+                    } else {
+                      field.onChange('');
+                    }
+                  }}
+                  renderInput={params => (
                     <TextField
                       {...params}
-                      placeholder="Selecciona tipo"
+                      placeholder="Selecciona o crea tipo"
                       error={!!errors.typeId}
                       helperText={errors?.typeId?.message}
                       variant="outlined"
@@ -259,28 +364,71 @@ export function CreateProduct() {
                 />
               )}
             />
+
           </Box>
-          {/* Estatus */}
-          <Box mb={2} display="flex" alignItems="center">
-            <FormControlLabel
-              control={
-                <Controller
-                  name="status"
-                  control={control}
-                  render={({ field }) => (
-                    <Switch
-                      {...field}
-                      checked={field.value}
-                      color="primary"
+          <Box mb={2}>
+            <Typography variant="subtitle1" fontWeight={500} mb={0.5}>
+              Departamento *
+            </Typography>
+            <Controller
+              name="departmentId"
+              control={control}
+              render={({ field }) => (
+                <Autocomplete
+                  options={dataDepartments || []}
+                  getOptionLabel={option =>
+                    typeof option === 'string'
+                      ? option
+                      : option?.name || ''
+                  }
+                  isOptionEqualToValue={(option, value) =>
+                    option.id === value || option.name === value
+                  }
+                  value={
+                    dataDepartments?.find(dep => dep.id === field.value) ||
+        (field.value ? { id: null, name: field.value } : null)
+                  }
+                  freeSolo
+                  onChange={async (_, value) => {
+                    if (value && value.id) {
+                      field.onChange(value.id);
+                      return;
+                    }
+                    if (typeof value === 'string' && value.trim().length > 0) {
+                      // ¿Ya existe por nombre?
+                      const alreadyExists = dataDepartments?.some(
+                        dep => dep.name.trim().toLowerCase() === value.trim().toLowerCase()
+                      );
+                      if (!alreadyExists) {
+                        // Crea nuevo departamento y selecciona
+                        const createdId = await handleCreateDepartment(value);
+                        if (createdId) {
+                          field.onChange(createdId);
+                          await tryGetDepartments();
+                          return;
+                        }
+                      }
+                      // Si ya existe, selecciona el existente
+                      const dep = dataDepartments.find(
+                        dep => dep.name.trim().toLowerCase() === value.trim().toLowerCase()
+                      );
+                      if (dep) field.onChange(dep.id);
+                    } else {
+                      field.onChange('');
+                    }
+                  }}
+                  renderInput={params => (
+                    <TextField
+                      {...params}
+                      placeholder="Selecciona o crea departamento"
+                      error={!!errors.departmentId}
+                      helperText={errors?.departmentId?.message}
+                      variant="outlined"
+                      sx={{ borderRadius: 2 }}
                     />
                   )}
                 />
-              }
-              label={
-                <Typography sx={{ color: '#3f51b5', fontWeight: 600 }}>
-                  Estatus: {control._formValues?.status ? 'Activo' : 'Inactivo'}
-                </Typography>
-              }
+              )}
             />
           </Box>
           {/* Botones */}
@@ -296,6 +444,7 @@ export function CreateProduct() {
                 '&:hover': { bgcolor: '#c92a2a' },
               }}
               onClick={handleViewRoute}
+              disabled={submitting}
             >
               Cancelar
             </Button>
@@ -303,7 +452,7 @@ export function CreateProduct() {
               type="submit"
               variant="contained"
               color="primary"
-              disabled={!isValid || Object.keys(dirtyFields).length === 0}
+              disabled={!isValid || Object.keys(dirtyFields).length === 0 || submitting}
               sx={{
                 minWidth: 130,
                 fontWeight: 700,

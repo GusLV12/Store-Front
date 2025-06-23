@@ -48,7 +48,7 @@ const OptionButtons = memo(
   ({ onUpdate = () => {}, onDelete = () => {} }) => {
     return (
       <div className="flex w-full flex-wrap flex-row justify-between items-center">
-        <Tooltip title="Editar provedor">
+        <Tooltip title="Editar proveedor">
           <span>
             <Button
               className="my-3"
@@ -119,7 +119,7 @@ export const Suppliers = () => {
   const handleFilterSearchQuery = async () => {
     triggerAction().then((isOk) => {
       if (!isOk) return;
-      makeRequest({ params: form });
+      makeRequest(form);
     });
   };
 
@@ -161,7 +161,7 @@ export const Suppliers = () => {
               className="my-6 w-4/5"
               placeholder="Escribe un nombre para buscar contacto"
               value={querySearch}
-              onChange={(query) => setQuerySearch(query)}
+              onChange={handleSearchQuery}
             />
             <div className="px-4 py-4">
               <Button

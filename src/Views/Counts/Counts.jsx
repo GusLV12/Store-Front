@@ -243,7 +243,6 @@ const { openModal, closeModal, } = useModal();
           </div>
         </Grid>
       </Grid>
-
     </>
   );
 };

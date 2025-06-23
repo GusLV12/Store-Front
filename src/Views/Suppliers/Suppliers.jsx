@@ -1,8 +1,9 @@
 import { memo, useEffect, useState } from 'react';
-import { Grid, Box, Tooltip, Button } from '@mui/material';
+import { Grid, Box, Tooltip, Button, Chip } from '@mui/material';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import CloudSyncIcon from '@mui/icons-material/CloudSync';
 import EditIcon from '@mui/icons-material/Edit';
+import { useNavigate } from 'react-router-dom';
 
 import { useNativeDebounce, useRequest } from '@/Hooks';
 import { getSuppliers } from '@/api/suppliers';
@@ -31,11 +32,6 @@ const tableRowScheme = [
     title: 'Dirección',
     width: '160px',
     maxWidth: '200px',
-  },
-  {
-    title: 'Productos',
-    width: '200px',
-    minWidth: '200px',
   },
   {
     title: 'Status',
@@ -95,6 +91,9 @@ export const Suppliers = () => {
     total: 0,
   });
 
+  // Navegacion a rutas hijas
+  const navigate = useNavigate();
+
   // Consumiendo endpoints
   const { makeRequest, response, loading } = useRequest(getSuppliers);
 
@@ -149,6 +148,10 @@ export const Suppliers = () => {
     }));
   };
 
+  const handleCreate = () => {
+    navigate('/suppliers/create');
+  };
+
   return (
     <>
       <Grid container spacing={6}>
@@ -160,23 +163,22 @@ export const Suppliers = () => {
               value={querySearch}
               onChange={(query) => setQuerySearch(query)}
             />
+            <div className="px-4 py-4">
+              <Button
+                variant="contained"
+                color="primary"
+                className="whitespace-nowrap mx-4"
+                onClick={handleCreate}
+              >
+              Agregar provedor
+              </Button>
+            </div>
           </Box>
         </Grid>
         <Grid item xs={12}>
           <Grid container spacing={1} className="p-2">
             <Grid item xs={12} className="p-8 mb-24">
               <div className="flex flex-row w-full justify-end">
-                <div className="mx-10 my-2 md:my-0 justify-center items-center flex">
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    size="medium"
-                    fullWidth
-                    onClick={() => console.log('Agregar producto')}
-                  >
-                              Agregar producto
-                  </Button>
-                </div>
 
                 <Paginator
                   totalPages={form.total}
@@ -201,8 +203,10 @@ export const Suppliers = () => {
               <ComposedTable.Column content={({ phone }) => phone} />
               <ComposedTable.Column content={({ email }) => email} />
               <ComposedTable.Column content={({ address }) => address} />
-              <ComposedTable.Column content={({ products }) => products} />
-              <ComposedTable.Column content={({ status }) => status} />
+              <ComposedTable.Column content={({ status }) => (
+                <Chip label={status ? 'Activo' : 'Inactivo'} color={status ? 'success' : 'error'} variant="outlined" />
+              )} />
+
               <ComposedTable.Column
                 content={({ id }) => (
                   <OptionButtons

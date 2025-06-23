@@ -1,8 +1,8 @@
-export const getSuppliers = {
+export const getSuppliers = () => ( {
   method: 'get',
   url: '/suppliers',
-};
-
+}
+);
 // ------------------------------- | Catalogos | -------------------------------
 export const catalogSuppliers = () =>({
   method: 'get',

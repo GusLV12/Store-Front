@@ -1,9 +1,10 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 
 import { CreateProduct, EditProducts, Products } from '@/Views/products';
+import { Suppliers, CreateSupplier } from '@/Views/Suppliers';
 
 import { MainLayout } from '../Layouts';
-import { Billing, Counts, Credits, Home, Login, Profile, Promotion, Reports, Suppliers } from '../Views';
+import { Billing, Counts, Credits, Home, Login, Profile, Promotion, Reports } from '../Views';
 import { AuthProvider, ProtectedRoute } from '../Context';
 
 export const AppRoutes = () => {
@@ -14,7 +15,6 @@ export const AppRoutes = () => {
 
           <Route element={<MainLayout />}>
             <Route path="/" element={<ProtectedRoute allowedRole={['user','admin']}><Home /></ProtectedRoute>}/>
-            <Route path="/suppliers" element={<ProtectedRoute allowedRole={['user', 'admin']}><Suppliers/></ProtectedRoute>} />
             <Route path="/credits" element={<ProtectedRoute allowedRole={['user', 'admin']}><Credits/></ProtectedRoute>} />
             <Route path="/reports" element={<ProtectedRoute allowedRole={['admin']}><Reports/></ProtectedRoute>}/>
             <Route path="/counts" element={<ProtectedRoute allowedRole={['admin']}><Counts/></ProtectedRoute>}/>
@@ -26,6 +26,10 @@ export const AppRoutes = () => {
             <Route path="/products" element={<ProtectedRoute allowedRole={['admin']}><Products /></ProtectedRoute>} />
             <Route path="/products/create" element={<ProtectedRoute allowedRole={['admin']}><CreateProduct /></ProtectedRoute>} />
             <Route path="/products/edit/:id" element={<ProtectedRoute allowedRole={['admin']}><EditProducts /></ProtectedRoute>} />
+
+            {/* Rutas de proveedores */}
+            <Route path="/suppliers" element={<ProtectedRoute allowedRole={['user', 'admin']}><Suppliers/></ProtectedRoute>} />
+            <Route path="/suppliers/create" element={<ProtectedRoute allowedRole={['user', 'admin']}><CreateSupplier/></ProtectedRoute>} />
           </Route>
 
           {/* Rutas sin Navbar y Footer */}

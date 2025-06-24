@@ -15,7 +15,6 @@ export const createProduct = (data) =>({
   data
 });
 
-// Si quieres, permite pasar data:
 export const updateProduct = (id, data) => ({
   method: 'PUT',
   url: `products/${id}`,

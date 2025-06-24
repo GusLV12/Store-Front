@@ -152,6 +152,10 @@ export const Suppliers = () => {
     navigate('/suppliers/create');
   };
 
+  const handleUpdate = (id) => {
+    navigate(`/suppliers/edit/${id}`);
+  };
+
   return (
     <>
       <Grid container spacing={6}>
@@ -210,7 +214,7 @@ export const Suppliers = () => {
               <ComposedTable.Column
                 content={({ id }) => (
                   <OptionButtons
-                    onUpdate={() => console.log('Update')}
+                    onUpdate={() => handleUpdate(id)}
                     onDelete={() => console.log('Delete')}
                   />
                 )}

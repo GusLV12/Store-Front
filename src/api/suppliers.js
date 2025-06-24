@@ -10,6 +10,16 @@ export const createSupplier = (data) => ({
   data,
 });
 
+export const getSupplierById = (id) => ({
+  method: 'GET',
+  url: `suppliers/${id}`,
+});
+
+export const updateSupplier = (id, data) => ({
+  method: 'PUT',
+  url: `suppliers/${id}`,
+  data,
+});
 // ------------------------------- | Catalogos | -------------------------------
 export const catalogSuppliers = () =>({
   method: 'get',

@@ -3,10 +3,11 @@ export const getUsers = {
   url: 'users',
 };
 
-export const createUser = {
+export const createUser = (data) => ({
   method: 'POST',
   url: 'users',
-};
+  data
+});
 
 export const getUserByID = {
   method: 'GET',

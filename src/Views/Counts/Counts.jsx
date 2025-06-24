@@ -159,11 +159,11 @@ const { openModal, closeModal, } = useModal();
 
   const handleCreate = () => {
     console.log('Haciendo clic en crear usuario');
-    navigate('/users/create');
+    navigate('/counts/create');
   };
 
   const handleUpdate = (id) => {
-    navigate(`/users/edit/${id}`);
+    navigate(`/counts/edit/${id}`);
   };
 
   return (

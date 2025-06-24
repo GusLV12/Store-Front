@@ -20,6 +20,12 @@ export const updateSupplier = (id, data) => ({
   url: `suppliers/${id}`,
   data,
 });
+
+export const deleteSupplier = (id) => ({
+  method: 'DELETE',
+  url: `suppliers/${id}`,
+});
+
 // ------------------------------- | Catalogos | -------------------------------
 export const catalogSuppliers = () =>({
   method: 'get',

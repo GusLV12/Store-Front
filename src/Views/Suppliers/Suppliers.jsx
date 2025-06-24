@@ -6,9 +6,10 @@ import EditIcon from '@mui/icons-material/Edit';
 import { useNavigate } from 'react-router-dom';
 
 import { useNativeDebounce, useRequest } from '@/Hooks';
-import { getSuppliers } from '@/api/suppliers';
+import { deleteSupplier, getSuppliers } from '@/api/suppliers';
+import { useModal } from '@/Context/ModalContext/ModalContext';
 
-import { ComposedTable, InputSearch, Paginator } from '../../Components/index';
+import { ComposedTable, DeleteModal, InputSearch, Paginator } from '../../Components/index';
 
 const tableRowScheme = [
   {
@@ -82,6 +83,7 @@ const OptionButtons = memo(
   });
 
 export const Suppliers = () => {
+  const { openModal, closeModal, } = useModal();
   const [querySearch, setQuerySearch] = useState('');
   const [dataList, setDataList] = useState([]);
   const [form, setForm] = useState({
@@ -96,6 +98,7 @@ export const Suppliers = () => {
 
   // Consumiendo endpoints
   const { makeRequest, response, loading } = useRequest(getSuppliers);
+  const { makeRequest: tryDeleteSupplier } = useRequest(deleteSupplier);
 
   const { triggerAction } = useNativeDebounce(600);
 
@@ -115,6 +118,21 @@ export const Suppliers = () => {
       total: response.total ?? prev.total,
     }));
   }, [response]);
+
+  // Modal de eliminar
+  const handleDelete = (id) => openModal(
+    <DeleteModal
+      open
+      onClose={(wasDeleted) => {
+        closeModal();
+        if (wasDeleted) {
+          handleFilterSearchQuery();
+        }
+      }}
+      id={id}
+      descripcion="¿Seguro que deseas eliminar este proveedor?"
+      makeRequest={() => tryDeleteSupplier(id)}
+    />);
 
   const handleFilterSearchQuery = async () => {
     triggerAction().then((isOk) => {
@@ -215,7 +233,7 @@ export const Suppliers = () => {
                 content={({ id }) => (
                   <OptionButtons
                     onUpdate={() => handleUpdate(id)}
-                    onDelete={() => console.log('Delete')}
+                    onDelete={() => handleDelete(id)}
                   />
                 )}
               />

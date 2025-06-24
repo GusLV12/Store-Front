@@ -3,9 +3,10 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { CreateProduct, EditProducts, Products } from '@/Views/products';
 import { Suppliers, CreateSupplier, EditSupplier } from '@/Views/Suppliers';
 import { CreateCount, EditCounts, Counts } from '@/Views/Counts';
+import { Credits } from '@/Views/Credits';
 
 import { MainLayout } from '../Layouts';
-import { Billing, Credits, Home, Login, Profile, Promotion, Reports } from '../Views';
+import { Billing,  Home, Login, Profile, Promotion, Reports } from '../Views';
 import { AuthProvider, ProtectedRoute } from '../Context';
 
 export const AppRoutes = () => {
@@ -16,7 +17,6 @@ export const AppRoutes = () => {
 
           <Route element={<MainLayout />}>
             <Route path="/" element={<ProtectedRoute allowedRole={['user','admin']}><Home /></ProtectedRoute>}/>
-            <Route path="/credits" element={<ProtectedRoute allowedRole={['user', 'admin']}><Credits/></ProtectedRoute>} />
             <Route path="/reports" element={<ProtectedRoute allowedRole={['admin']}><Reports/></ProtectedRoute>}/>
 
             {/*Vistas users*/}
@@ -27,6 +27,9 @@ export const AppRoutes = () => {
             <Route path="/billing" element={<ProtectedRoute allowedRole={['admin','user']}><Billing/></ProtectedRoute>} />
             <Route path="/profile" element={<ProtectedRoute allowedRole={['admin','user']}><Profile/></ProtectedRoute>} />
             <Route path="/promotions" element={<ProtectedRoute allowedRole={['admin']}><Promotion/></ProtectedRoute>} />
+
+            {/* Rutas de créditos */}
+            <Route path="/credits" element={<ProtectedRoute allowedRole={['user', 'admin']}><Credits/></ProtectedRoute>} />
 
             {/* Vistas Products */}
             <Route path="/products" element={<ProtectedRoute allowedRole={['admin']}><Products /></ProtectedRoute>} />

@@ -1,25 +1,27 @@
-export const getUsers = {
+export const getUsers = (params) => ({
   method: 'GET',
   url: 'users',
-};
+  params,
+});
 
 export const createUser = (data) => ({
   method: 'POST',
   url: 'users',
-  data
+  data,
 });
 
-export const getUserByID = {
+export const getUserByID = (id) => ({
   method: 'GET',
-  url: 'users/:id',
-};
+  url:`users/${id}`,
+});
 
-export const updateUser = {
+export const updateUser = (id, data) => ({
   method: 'PUT',
-  url: 'users',
-};
+  url: `users/${id}`,
+  data,
+});
 
-export const deleteUser = {
+export const deleteUser = (id) => ({
   method: 'DELETE',
-  url: 'users',
-};
+  url: `users/${id}`,
+});

@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import {
@@ -6,66 +7,88 @@ import {
   TextField,
   Typography,
   Autocomplete,
-  Switch,
-  FormControlLabel,
   Paper,
 } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 
 import { useRequest } from '@/Hooks';
+import { getUserByID, updateUser } from '@/api/user';
+import { LoadingSpinner } from '@/Components/LoadingSpinner/LoadingSpinner';
 
-import {createUser} from '@/api/user'
 import { schemaUser, defaultValues, dataRoles } from './validators/validations';
 
-export function CreateCount() {
+export const EditCounts = () => {
+  const { id } = useParams();
   const navigate = useNavigate();
+  const [loadingData, setLoadingData] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-  const [formKey, setFormKey] = useState(Date.now());
 
+  // Formulario
   const {
     control,
     handleSubmit,
-    formState: { errors, isValid, dirtyFields },
     reset,
+    formState: { errors, isValid, dirtyFields },
   } = useForm({
     defaultValues: { ...defaultValues },
     resolver: yupResolver(schemaUser),
     mode: 'onChange',
   });
 
-  // Si tienes la función, descomenta para crear usuario en la API real:
-  const { makeRequest: tryCreateUser } = useRequest(createUser);
+  // Endpoints
+  const { makeRequest: tryGetUser, response: userData } = useRequest(getUserByID);
+  const { makeRequest: tryUpdateUser } = useRequest(updateUser);
 
-  // --- SUBMIT global ---
+  // Carga de datos inicial
+  useEffect(() => {
+    async function fetchData() {
+      setLoadingData(true);
+
+      const usuario = await tryGetUser(id);
+      if (usuario) {
+        // Quitar la contrasena
+        const { password, ...usuarioSinContrasena } = usuario;
+        reset({
+          ...usuarioSinContrasena
+        });
+      }
+      setLoadingData(false);
+    }
+    fetchData();
+    // eslint-disable-next-line
+  }, [id]);
+
+  // Submit edición
   const onSubmit = async (data) => {
     setSubmitting(true);
-    console.log('Datos del formulario:', data);
     try {
-      // Arma data final (ajusta nombres según tu backend)
+
       const userToSend = {
-        ...data,
+        ...data
       };
 
-      // 4. Aquí puedes guardar en la API real:
-      await tryCreateUser(userToSend);
-
-      alert(`Producto creado:\n${JSON.stringify(userToSend, null, 2)}`);
-      reset({
-        ...defaultValues,
-      });
-      setFormKey(Date.now());
+      await tryUpdateUser(id, userToSend);
+      alert('Usuario actualizado correctamente');
+      navigate('/counts');
     } catch (err) {
-      alert('Error al crear el usuario');
+      alert('Error al actualizar usuario');
       console.error(err);
     } finally {
       setSubmitting(false);
     }
   };
 
-  const handleViewRoute = () => {
+  const handleCancel = () => {
     navigate('/counts');
   };
+
+  if (loadingData) {
+    return (
+      <Box sx={{ minHeight: '80vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <LoadingSpinner size="3rem" />
+      </Box>
+    );
+  }
 
   return (
     <Box
@@ -98,9 +121,9 @@ export function CreateCount() {
             letterSpacing: 1,
           }}
         >
-          Crear usuario
+          Actualizar usuario
         </Typography>
-        <form key={formKey} onSubmit={handleSubmit(onSubmit)} autoComplete="off">
+        <form onSubmit={handleSubmit(onSubmit)} autoComplete="off">
           {/* Nombre de usuario */}
           <Box mb={2}>
             <Typography variant="subtitle1" fontWeight={500} mb={0.5}>
@@ -201,7 +224,7 @@ export function CreateCount() {
                 bgcolor: '#fa5252',
                 '&:hover': { bgcolor: '#c92a2a' },
               }}
-              onClick={handleViewRoute}
+              onClick={handleCancel}
               disabled={submitting}
             >
               Cancelar
@@ -226,4 +249,4 @@ export function CreateCount() {
       </Paper>
     </Box>
   );
-}
+};

@@ -8,7 +8,6 @@ import { useNavigate } from 'react-router-dom';
 import { useNativeDebounce, useRequest } from '@/Hooks';
 import { deleteUser, getUsers} from '@/api/user';
 import { useModal } from '@/Context/ModalContext/ModalContext';
-import { ProductOverviewModal } from '@/modals/ProductOverviewModal/ProductOverviewModal';
 
 import { ComposedTable, DeleteModal, InputSearch, Paginator } from '../../Components/index';
 

@@ -2,7 +2,7 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom';
 
 import { CreateProduct, EditProducts, Products } from '@/Views/products';
 import { Suppliers, CreateSupplier } from '@/Views/Suppliers';
-import { CreateCount, Counts } from '@/Views/Counts';
+import { CreateCount, EditCounts, Counts } from '@/Views/Counts';
 
 import { MainLayout } from '../Layouts';
 import { Billing, Credits, Home, Login, Profile, Promotion, Reports } from '../Views';
@@ -21,12 +21,13 @@ export const AppRoutes = () => {
             {/*Vistas users*/}
             <Route path="/counts" element={<ProtectedRoute allowedRole={['admin']}><Counts/></ProtectedRoute>}/>
             <Route path="/counts/create" element={<ProtectedRoute allowedRole={['admin']}><CreateCount /></ProtectedRoute>} />
+            <Route path="/counts/edit/:id" element={<ProtectedRoute allowedRole={['admin']}><EditCounts /></ProtectedRoute>} />
             
             <Route path="/billing" element={<ProtectedRoute allowedRole={['admin','user']}><Billing/></ProtectedRoute>} />
             <Route path="/profile" element={<ProtectedRoute allowedRole={['admin','user']}><Profile/></ProtectedRoute>} />
             <Route path="/promotions" element={<ProtectedRoute allowedRole={['admin']}><Promotion/></ProtectedRoute>} />
 
-            {/* Vistas Prodcuts */}
+            {/* Vistas Products */}
             <Route path="/products" element={<ProtectedRoute allowedRole={['admin']}><Products /></ProtectedRoute>} />
             <Route path="/products/create" element={<ProtectedRoute allowedRole={['admin']}><CreateProduct /></ProtectedRoute>} />
             <Route path="/products/edit/:id" element={<ProtectedRoute allowedRole={['admin']}><EditProducts /></ProtectedRoute>} />

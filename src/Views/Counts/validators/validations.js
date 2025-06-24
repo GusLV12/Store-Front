@@ -15,3 +15,5 @@ export const defaultValues = {
   role: '',
   phone: '',
 };
+
+export const dataRoles = ["admin", "user", "client"];

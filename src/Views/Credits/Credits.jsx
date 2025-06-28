@@ -1,11 +1,13 @@
 import { memo, useEffect, useState } from 'react';
-import { Grid, Box, Tooltip, Button } from '@mui/material';
+import { Grid, Box, Tooltip, Button, Chip } from '@mui/material';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import EditIcon from '@mui/icons-material/Edit';
 import { useNavigate } from 'react-router-dom';
 
 import { useNativeDebounce, useRequest } from '@/Hooks';
 import { getCredits, deleteCredit } from '@/api/credits';
+import { useModal } from '@/Context/ModalContext/ModalContext';
+import { useAuth } from '@/Context';
 
 import { ComposedTable, DeleteModal, InputSearch, Paginator } from '../../Components';
 
@@ -16,7 +18,6 @@ const tableRowScheme = [
   },
   {
     title: 'Correo',
-    width: '180px',
     minWidth: '180px',
   },
   {
@@ -33,7 +34,7 @@ const tableRowScheme = [
     maxWidth: '200px',
   },
   {
-    title: 'Ultimo pago',
+    title: 'Ultimo cambio',
     width: '200px',
     minWidth: '200px',
   },
@@ -49,7 +50,7 @@ const tableRowScheme = [
 ];
 
 const OptionButtons = memo(
-  ({ onUpdate = () => {}, onDelete = () => {} }) => (
+  ({ onUpdate = () => {}, onDelete = () => {}, role }) => (
     <div className="flex w-full flex-wrap flex-row justify-between items-center">
       <Tooltip title="Editar crédito">
         <span>
@@ -75,6 +76,7 @@ const OptionButtons = memo(
             variant="contained"
             color="error"
             sx={{ minWidth: '3.2rem', aspectRatio: 1 / 1, padding: '0rem', borderRadius: '50%' }}
+            disabled={role === 'user'}
           >
             <DeleteForeverIcon />
           </Button>
@@ -85,7 +87,9 @@ const OptionButtons = memo(
 );
 
 export const Credits = () => {
+  const { openModal, closeModal, } = useModal();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [querySearch, setQuerySearch] = useState('');
   const [dataList, setDataList] = useState([]);
   const [form, setForm] = useState({
@@ -100,15 +104,6 @@ export const Credits = () => {
   const { makeRequest: tryDeleteCredit } = useRequest(deleteCredit);
 
   const { triggerAction } = useNativeDebounce(600);
-
-  // Eliminar
-  const handleDelete = (id) => {
-    // Aquí deberías usar tu modal como en products
-    // Por simplicidad, solo confirm
-    if (window.confirm('¿Seguro que deseas eliminar este crédito?')) {
-      tryDeleteCredit(id).then(() => handleFilterSearchQuery());
-    }
-  };
 
   // Ejecuta cuando cambia search, page o limit
   useEffect(() => {
@@ -157,6 +152,21 @@ export const Credits = () => {
       page: 1,
     }));
   };
+
+  // Modal de eliminar
+  const handleDelete = (id) => openModal(
+    <DeleteModal
+      open
+      onClose={(wasDeleted) => {
+        closeModal();
+        if (wasDeleted) {
+          handleFilterSearchQuery();
+        }
+      }}
+      id={id}
+      descripcion="¿Seguro que deseas eliminar este credito?"
+      makeRequest={() => tryDeleteCredit(id)}
+    />);
 
   const handleCreate = () => {
     navigate('/credits/create');
@@ -212,34 +222,50 @@ export const Credits = () => {
               data={dataList}
               isLoading={loading}
             >
-              {/* Nombre cliente */}
+
               <ComposedTable.Column content={({ user }) => user?.username ?? '-'} />
-              {/* Correo */}
               <ComposedTable.Column content={({ user }) => user?.email ?? '-'} />
-              {/* Teléfono */}
               <ComposedTable.Column content={({ user }) => user?.phone ?? '-'} />
-              {/* Monto crédito */}
-              <ComposedTable.Column content={({ amount }) => `$${amount?.toFixed(2) ?? '-'}`} />
-              {/* Total venta - como ya no tienes sale, puedes mostrar "-" o sumar cambios si quieres */}
-              <ComposedTable.Column content={() => '-'} />
-              {/* Último pago (último movimiento en changes) */}
+              <ComposedTable.Column content={({ amount }) => `$${amount?.toFixed(2) ?? 'N/A'}`} />
+
+              <ComposedTable.Column
+                content={({ saldoActual }) => (
+                  <span style={{ color: saldoActual <= 0 ? '#d32f2f' : '#388e3c', fontWeight: 600 }}>
+                  ${saldoActual ?? 'N/A'}
+                  </span>
+                )}
+              />
+
+              {/* Último pago */}
               <ComposedTable.Column
                 content={({ changes }) => {
-                  if (!changes?.length) return '-';
+                  if (!changes?.length) return 'N/A';
                   const last = changes[changes.length - 1];
                   return last
-                    ? `$${last.changeAmount?.toFixed(2)} - ${new Date(last.date).toLocaleDateString()}`
+                    ? (
+                      <>
+                        <span style={{ fontWeight: 600 }}>
+                          {last.changeAmount > 0 ? '+' : ''}
+                          {last.changeAmount}
+                        </span>
+                        {' - '}
+                        <span>
+                          {new Date(last.date).toLocaleDateString()}
+                        </span>
+                      </>
+                    )
                     : '-';
                 }}
               />
-              {/* Status */}
-              <ComposedTable.Column content={({ status }) => status} />
-              {/* Opciones */}
+              <ComposedTable.Column content={({ status }) => (
+                <Chip label={status} color={status === 'ACTIVE' ? 'success' : 'primary' } variant="outlined" />
+              )} />
               <ComposedTable.Column
                 content={({ id }) => (
                   <OptionButtons
                     onUpdate={() => handleUpdate(id)}
                     onDelete={() => handleDelete(id)}
+                    role={user?.role}
                   />
                 )}
               />

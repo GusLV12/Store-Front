@@ -3,7 +3,7 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { CreateProduct, EditProducts, Products } from '@/Views/products';
 import { Suppliers, CreateSupplier, EditSupplier } from '@/Views/Suppliers';
 import { CreateCount, EditCounts, Counts } from '@/Views/Counts';
-import { Credits } from '@/Views/Credits';
+import { CreateCredit, Credits, EditCredit } from '@/Views/Credits';
 
 import { MainLayout } from '../Layouts';
 import { Billing,  Home, Login, Profile, Promotion, Reports } from '../Views';
@@ -30,6 +30,8 @@ export const AppRoutes = () => {
 
             {/* Rutas de créditos */}
             <Route path="/credits" element={<ProtectedRoute allowedRole={['user', 'admin']}><Credits/></ProtectedRoute>} />
+            <Route path="/credits/create" element={<ProtectedRoute allowedRole={['user', 'admin']}><CreateCredit /></ProtectedRoute>} />
+            <Route path="/credits/edit/:id" element={<ProtectedRoute allowedRole={['user', 'admin']}><EditCredit /></ProtectedRoute>} />
 
             {/* Vistas Products */}
             <Route path="/products" element={<ProtectedRoute allowedRole={['admin']}><Products /></ProtectedRoute>} />

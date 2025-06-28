@@ -25,3 +25,9 @@ export const deleteUser = (id) => ({
   method: 'DELETE',
   url: `users/${id}`,
 });
+
+// ------------------------------- | Catalogos | -------------------------------
+export const catalogUsers = () =>({
+  method: 'get',
+  url: '/users/catalog',
+});

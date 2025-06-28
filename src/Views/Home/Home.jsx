@@ -19,7 +19,7 @@ export const Home = () => {
     total: 0,
   });
 
-  const { makeRequest, response, loading, error } = useRequest(getProducts);
+  const { makeRequest, response, loading } = useRequest(getProducts);
   const { triggerAction } = useNativeDebounce();
 
   const handleSearchQuery = (query = '') => {

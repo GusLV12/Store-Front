@@ -3,7 +3,6 @@ import { createContext, useContext, useState } from 'react';
 const ListProductContext = createContext();
 
 export const ListProductProvider = ({ children }) => {
-  // Estado para guardar los productos y la paginación
   const [productList, setProductList] = useState([]);
   const [pagination, setPagination] = useState({
     total: 0,
@@ -11,7 +10,7 @@ export const ListProductProvider = ({ children }) => {
     last_page: 1,
   });
 
-  // Guarda todos los productos recibidos (array completo del backend)
+  // Actualiza todo el listado (al hacer fetch)
   const updateProductList = (data, meta = {}) => {
     setProductList(data || []);
     setPagination({
@@ -21,7 +20,7 @@ export const ListProductProvider = ({ children }) => {
     });
   };
 
-  // Agrega un producto al listado
+  // Agregar, actualizar o eliminar productos si lo requieres después
   const addProduct = (product) => {
     setProductList((prev) => [...prev, product]);
     setPagination((prev) => ({
@@ -30,7 +29,6 @@ export const ListProductProvider = ({ children }) => {
     }));
   };
 
-  // Actualiza un producto existente
   const updateProduct = (updatedProduct) => {
     setProductList((prev) =>
       prev.map((product) =>
@@ -39,7 +37,6 @@ export const ListProductProvider = ({ children }) => {
     );
   };
 
-  // Elimina un producto
   const removeProduct = (barcode) => {
     setProductList((prev) => prev.filter((product) => product.barcode !== barcode));
     setPagination((prev) => ({
@@ -57,6 +54,8 @@ export const ListProductProvider = ({ children }) => {
         addProduct,
         updateProduct,
         removeProduct,
+        setProductList, // útil para manejo avanzado o reseteo manual
+        setPagination,
       }}
     >
       {children}
@@ -64,5 +63,4 @@ export const ListProductProvider = ({ children }) => {
   );
 };
 
-// Hook para consumir el contexto fácilmente
 export const useListProduct = () => useContext(ListProductContext);

@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
-import { Box, Button, CircularProgress, Grid, Stack } from '@mui/material';
+import { Box, Button, Grid } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 
 import { useNativeDebounce, useRequest } from '@/Hooks';
 import { getProducts } from '@/api/products';
 import { LoadingSpinner } from '@/Components/LoadingSpinner/LoadingSpinner';
+import { useCart } from '@/Context/CartContext/CartContext';
 
 import { InputSearch, ProductCard } from '../../Components';
 import { ProductOverviewModal } from '../../modals/ProductOverviewModal/ProductOverviewModal';
@@ -12,6 +13,7 @@ import { useModal } from '../../Context/ModalContext/ModalContext';
 
 export const Home = () => {
   const { openModal } = useModal();
+  const { addToCart } = useCart();
   const navigate = useNavigate();
   const [dataList, setDataList] = useState([]);
   const [form, setForm] = useState({
@@ -32,7 +34,6 @@ export const Home = () => {
     }));
   };
 
-  // 2. Limpia todos los filtros (regresa a la vista inicial)
   const handleClearAllFilters = () => {
     setForm({
       search: '',
@@ -44,8 +45,6 @@ export const Home = () => {
 
   const openDialog = () => openModal(<ProductOverviewModal />);
 
-  // Carga inicial de productos (sin debounce)
-
   useEffect(() => {
     triggerAction().then((isOk) => {
       if (!isOk) return;
@@ -54,7 +53,6 @@ export const Home = () => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [form.search, form.page, form.limit]);
 
-  // Actualiza dataList y total cuando llega la respuesta
   useEffect(() => {
     if (!response) return;
     setDataList(response.data || []);
@@ -73,7 +71,7 @@ export const Home = () => {
       <div className="flex justify-center items-center w-3/5 mx-auto gap-8">
         <InputSearch
           className="my-6"
-          placeholder="Escribe un nombre para buscar contacto"
+          placeholder="Escribe un nombre para buscar producto"
           value={form.search}
           onChange={handleSearchQuery}
           onClear={handleClearAllFilters}
@@ -98,11 +96,9 @@ export const Home = () => {
         </Button>
       </div>
 
-      {/* {loading && <LoadingSpinner size="3rem" />} */}
       {loading && <LoadingSpinner size="3rem" />}
 
       {!loading && (
-
         <Grid
           container spacing={2}
           justifyContent="center"
@@ -123,6 +119,9 @@ export const Home = () => {
                   description={product.description}
                   stock={product.stock}
                   price={product.saleCost}
+                  // Nuevo: agrega producto al carrito
+                  // onAddToCart={() => addToCart(product)}
+                  {...product}
                 />
               </Grid>
             ))

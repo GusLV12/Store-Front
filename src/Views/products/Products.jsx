@@ -1,14 +1,12 @@
 import { memo, useEffect, useState } from 'react';
 import { Grid, Box, Tooltip, Button } from '@mui/material';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
-import CloudSyncIcon from '@mui/icons-material/CloudSync';
 import EditIcon from '@mui/icons-material/Edit';
 import { useNavigate } from 'react-router-dom';
 
 import { useNativeDebounce, useRequest } from '@/Hooks';
 import { deleteProduct, getProducts } from '@/api/products';
 import { useModal } from '@/Context/ModalContext/ModalContext';
-import { ProductOverviewModal } from '@/modals/ProductOverviewModal/ProductOverviewModal';
 
 import { ComposedTable, DeleteModal, InputSearch, Paginator } from '../../Components/index';
 

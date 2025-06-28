@@ -26,4 +26,14 @@ export const deleteCredit = (id) => ({
   url: `credits/${id}`,
 });
 
-// Endpoint CreditChanges
+// --------------------------- | Endpoints creditCahneges | ---------------------------
+export const createCreditChange = (data) => ({
+  method: 'POST',
+  url: 'credit-changes',
+  data,
+});
+
+export const creditByUser = (id)=> ({
+  method: 'GET',
+  url: `credit-changes/payment/${id}`,
+});

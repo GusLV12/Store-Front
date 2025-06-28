@@ -1,12 +1,9 @@
-import { Box, Button, Card, CardActionArea, CardActions, CardContent, CardMedia, IconButton, Typography } from '@mui/material';
-import SkipPreviousIcon from '@mui/icons-material/SkipPrevious';
-import PlayArrowIcon from '@mui/icons-material/PlayArrow';
-import SkipNextIcon from '@mui/icons-material/SkipNext';
+import { Box, Card, CardActionArea, CardActions, CardContent, CardMedia, IconButton, Typography } from '@mui/material';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
 import { useState } from 'react';
 
-export const ProductCard = ({ img = 'img/banners/boxes.jpg', name = 'producto', description = '', stock }) => {
+export const ProductCard = ({ img = 'img/banners/boxes.jpg', name = 'producto', description = '', stock, price }) => {
   const[quantity, setQuantity] = useState(0);
 
   const handleAdd = () => {
@@ -38,7 +35,18 @@ export const ProductCard = ({ img = 'img/banners/boxes.jpg', name = 'producto', 
           </Typography>
         </CardContent>
       </CardActionArea>
-      <CardActions className="flex justify-end">
+      <CardActions className="flex justify-evenly">
+
+        <Box>
+          <Typography
+            variant="h6"
+            color="primary"
+            sx={{ fontWeight: 700, ml: 1 }}
+          >
+          ${Number(price).toFixed(2)}
+          </Typography>
+        </Box>
+
         <Box sx={{ display: 'flex', alignItems: 'center', pl: 1, pb: 1 }}>
           <IconButton aria-label="previous" onClick={handleRemove}>
             <RemoveCircleOutlineIcon />

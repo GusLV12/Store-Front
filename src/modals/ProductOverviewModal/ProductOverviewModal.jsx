@@ -12,16 +12,25 @@ import {
   TableRow,
 } from '@mui/material';
 import ShoppingCartCheckoutIcon from '@mui/icons-material/ShoppingCartCheckout';
+import { useNavigate } from 'react-router-dom';
 
 import { useCart } from '@/Context/CartContext/CartContext';
+import { useModal } from '@/Context/ModalContext/ModalContext';
 
 export const ProductOverviewModal = () => {
-  const { cart, removeFromCart, clearCart } = useCart();
+  const { closeModal } = useModal();
+  const { cart, removeFromCart } = useCart();
+  const navigate = useNavigate();
 
   const items = cart.filter(p => (p.quantity || 0) > 0);
   const subtotal = items.reduce((acc, p) => acc + (p.saleCost || p.price) * (p.quantity || 1), 0);
   const ivaTotal = subtotal * 0.16;
   const total = subtotal + ivaTotal;
+
+  const handleNavigateToPayment = () => {
+    navigate('/payment');
+    closeModal();
+  };
 
   return (
     <Card sx={{ minWidth: 700, padding: 2 }}>
@@ -75,7 +84,7 @@ export const ProductOverviewModal = () => {
           <Typography variant="body2">IVA Total (16%): ${ivaTotal.toFixed(2)}</Typography>
           <Typography variant="h6">Total: ${total.toFixed(2)}</Typography>
         </Box>
-        <Button variant="contained" color="success" onClick={clearCart}>
+        <Button variant="contained" color="success" onClick={() => handleNavigateToPayment()}>
           Confirmar Pago
         </Button>
       </Box>

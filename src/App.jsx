@@ -1,3 +1,5 @@
+import { BrowserRouter } from 'react-router-dom';
+
 import { CartProvider } from './Context/CartContext/CartContext';
 import { ListProductProvider } from './Context/ListProductContext/ListProductContext';
 import { GlobalModalRenderer } from './Context/ModalContext/GlobalModalRenderer';
@@ -8,14 +10,16 @@ export const App = () => {
 
   return (
     <>
-      <ListProductProvider>
-        <CartProvider>
-          <ModalProvider>
-            <AppRoutes />
-            <GlobalModalRenderer />
-          </ModalProvider>
-        </CartProvider>
-      </ListProductProvider>
+      <BrowserRouter>
+        <ListProductProvider>
+          <CartProvider>
+            <ModalProvider>
+              <AppRoutes />
+              <GlobalModalRenderer />
+            </ModalProvider>
+          </CartProvider>
+        </ListProductProvider>
+      </BrowserRouter>
     </>
   );
 };

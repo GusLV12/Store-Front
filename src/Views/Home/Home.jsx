@@ -5,7 +5,6 @@ import { useNavigate } from 'react-router-dom';
 import { useNativeDebounce, useRequest } from '@/Hooks';
 import { getProducts } from '@/api/products';
 import { LoadingSpinner } from '@/Components/LoadingSpinner/LoadingSpinner';
-import { useCart } from '@/Context/CartContext/CartContext';
 
 import { InputSearch, ProductCard } from '../../Components';
 import { ProductOverviewModal } from '../../modals/ProductOverviewModal/ProductOverviewModal';
@@ -13,7 +12,7 @@ import { useModal } from '../../Context/ModalContext/ModalContext';
 
 export const Home = () => {
   const { openModal } = useModal();
-  const { addToCart } = useCart();
+
   const navigate = useNavigate();
   const [dataList, setDataList] = useState([]);
   const [form, setForm] = useState({

@@ -21,7 +21,7 @@ import { createDepartment, getDepartments } from '@/api/departments';
 import { catalogSuppliers } from '@/api/suppliers';
 import { createProduct } from '@/api/products';
 
-import { schemaProduct, defaultValues } from './validators/create';
+import { schemaProduct, defaultValues } from './validators/validations';
 
 export function CreateProduct() {
   const navigate = useNavigate();

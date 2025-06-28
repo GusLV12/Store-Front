@@ -1,14 +1,12 @@
 import { memo, useEffect, useState } from 'react';
 import { Grid, Box, Tooltip, Button } from '@mui/material';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
-import CloudSyncIcon from '@mui/icons-material/CloudSync';
 import EditIcon from '@mui/icons-material/Edit';
 import { useNavigate } from 'react-router-dom';
 
 import { useNativeDebounce, useRequest } from '@/Hooks';
 import { deleteProduct, getProducts } from '@/api/products';
 import { useModal } from '@/Context/ModalContext/ModalContext';
-import { ProductOverviewModal } from '@/modals/ProductOverviewModal/ProductOverviewModal';
 
 import { ComposedTable, DeleteModal, InputSearch, Paginator } from '../../Components/index';
 
@@ -95,7 +93,7 @@ export const Products = () => {
     total: 0,
   });
 
-  // Navegacion a ritas hijas
+  // Navegacion a rutas hijas
   const navigate = useNavigate();
 
   const { makeRequest, response, loading } = useRequest(getProducts);
@@ -168,7 +166,6 @@ export const Products = () => {
   };
 
   const handleCreate = () => {
-    console.log('Haciendo clic en crear producto');
     navigate('/products/create');
   };
 
@@ -193,7 +190,6 @@ export const Products = () => {
                 variant="contained"
                 color="primary"
                 onClick={handleCreate}
-              // startIcon={<GroupAddIcon />}
               >
               Agregar producto
               </Button>

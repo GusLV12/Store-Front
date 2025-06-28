@@ -1,13 +1,15 @@
 import { memo, useEffect, useState } from 'react';
-import { Grid, Box, Tooltip, Button } from '@mui/material';
+import { Grid, Box, Tooltip, Button, Chip } from '@mui/material';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
-import CloudSyncIcon from '@mui/icons-material/CloudSync';
 import EditIcon from '@mui/icons-material/Edit';
+import { useNavigate } from 'react-router-dom';
 
 import { useNativeDebounce, useRequest } from '@/Hooks';
-import { getCredits } from '@/api/credits';
+import { getCredits, deleteCredit } from '@/api/credits';
+import { useModal } from '@/Context/ModalContext/ModalContext';
+import { useAuth } from '@/Context';
 
-import { ComposedTable, InputSearch, Paginator } from '../../Components/index';
+import { ComposedTable, DeleteModal, InputSearch, Paginator } from '../../Components';
 
 const tableRowScheme = [
   {
@@ -16,7 +18,6 @@ const tableRowScheme = [
   },
   {
     title: 'Correo',
-    width: '180px',
     minWidth: '180px',
   },
   {
@@ -33,7 +34,7 @@ const tableRowScheme = [
     maxWidth: '200px',
   },
   {
-    title: 'Ultimo pago',
+    title: 'Ultimo cambio',
     width: '200px',
     minWidth: '200px',
   },
@@ -49,43 +50,46 @@ const tableRowScheme = [
 ];
 
 const OptionButtons = memo(
-  ({ onUpdate = () => {}, onDelete = () => {} }) => {
-    return (
-      <div className="flex w-full flex-wrap flex-row justify-between items-center">
-        <Tooltip title="Editar provedor">
-          <span>
-            <Button
-              className="my-3"
-              onClick={onUpdate}
-              size="small"
-              variant="contained"
-              color="primary"
-              sx={{ minWidth: '3.2rem', aspectRatio: 1 / 1, padding: '0rem', borderRadius: '50%' }}
-            >
-              <EditIcon />
-            </Button>
-          </span>
-        </Tooltip>
+  ({ onUpdate = () => {}, onDelete = () => {}, role }) => (
+    <div className="flex w-full flex-wrap flex-row justify-between items-center">
+      <Tooltip title="Editar crédito">
+        <span>
+          <Button
+            className="my-3"
+            onClick={onUpdate}
+            size="small"
+            variant="contained"
+            color="primary"
+            sx={{ minWidth: '3.2rem', aspectRatio: 1 / 1, padding: '0rem', borderRadius: '50%' }}
+          >
+            <EditIcon />
+          </Button>
+        </span>
+      </Tooltip>
 
-        <Tooltip title="Eliminar provedor">
-          <span>
-            <Button
-              className="my-3"
-              onClick={onDelete}
-              size="small"
-              variant="contained"
-              color="error"
-              sx={{ minWidth: '3.2rem', aspectRatio: 1 / 1, padding: '0rem', borderRadius: '50%' }}
-            >
-              <DeleteForeverIcon />
-            </Button>
-          </span>
-        </Tooltip>
-      </div>
-    );
-  });
+      <Tooltip title="Eliminar crédito">
+        <span>
+          <Button
+            className="my-3"
+            onClick={onDelete}
+            size="small"
+            variant="contained"
+            color="error"
+            sx={{ minWidth: '3.2rem', aspectRatio: 1 / 1, padding: '0rem', borderRadius: '50%' }}
+            disabled={role === 'user'}
+          >
+            <DeleteForeverIcon />
+          </Button>
+        </span>
+      </Tooltip>
+    </div>
+  )
+);
 
 export const Credits = () => {
+  const { openModal, closeModal, } = useModal();
+  const navigate = useNavigate();
+  const { user } = useAuth();
   const [querySearch, setQuerySearch] = useState('');
   const [dataList, setDataList] = useState([]);
   const [form, setForm] = useState({
@@ -95,21 +99,21 @@ export const Credits = () => {
     total: 0,
   });
 
-  // Consumiendo endpoints
+  // Endpoints
   const { makeRequest, response, loading } = useRequest(getCredits);
+  const { makeRequest: tryDeleteCredit } = useRequest(deleteCredit);
 
   const { triggerAction } = useNativeDebounce(600);
 
   // Ejecuta cuando cambia search, page o limit
   useEffect(() => {
     handleFilterSearchQuery();
-
+    // eslint-disable-next-line
   }, [form.search, form.page, form.limit]);
 
   // Actualiza dataList y total solo cuando llega nueva respuesta
   useEffect(() => {
     if (!response) return;
-    console.log('Response received:', response);
     setDataList(response.data || []);
     setForm((prev) => ({
       ...prev,
@@ -120,7 +124,7 @@ export const Credits = () => {
   const handleFilterSearchQuery = async () => {
     triggerAction().then((isOk) => {
       if (!isOk) return;
-      makeRequest({ params: form });
+      makeRequest(form);
     });
   };
 
@@ -149,6 +153,30 @@ export const Credits = () => {
     }));
   };
 
+  // Modal de eliminar
+  const handleDelete = (id) => openModal(
+    <DeleteModal
+      open
+      onClose={(wasDeleted) => {
+        closeModal();
+        if (wasDeleted) {
+          handleFilterSearchQuery();
+        }
+      }}
+      id={id}
+      descripcion="¿Seguro que deseas eliminar este credito?"
+      makeRequest={() => tryDeleteCredit(id)}
+    />);
+
+  const handleCreate = () => {
+    navigate('/credits/create');
+  };
+
+  // Editar
+  const handleUpdate = (id) => {
+    navigate(`/credits/edit/${id}`);
+  };
+
   return (
     <>
       <Grid container spacing={6}>
@@ -156,33 +184,31 @@ export const Credits = () => {
           <Box className="flex justify-center items-center w-full">
             <InputSearch
               className="my-6 w-4/5"
-              placeholder="Escribe un nombre para buscar contacto"
+              placeholder="Escribe un nombre para buscar cliente"
               value={querySearch}
-              onChange={(query) => setQuerySearch(query)}
+              onChange={handleSearchQuery}
             />
+            <div className="px-4 py-4">
+              <Button
+                className="whitespace-nowrap mx-4"
+                variant="contained"
+                color="primary"
+                onClick={handleCreate}
+              >
+                Agregar crédito
+              </Button>
+            </div>
           </Box>
         </Grid>
         <Grid item xs={12}>
           <Grid container spacing={1} className="p-2">
             <Grid item xs={12} className="p-8 mb-24">
               <div className="flex flex-row w-full justify-end">
-                <div className="mx-10 my-2 md:my-0 justify-center items-center flex">
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    size="medium"
-                    fullWidth
-                    onClick={() => console.log('Agregar producto')}
-                  >
-                                Agregar producto
-                  </Button>
-                </div>
-
                 <Paginator
                   totalPages={form.total}
                   totalItems={form.limit}
-                  onChangeCurrentPage={(page) => handleChangePage(page)}
-                  onChangeItemsPerPage={(items) => handleChangeItems(items)}
+                  onChangeCurrentPage={handleChangePage}
+                  onChangeItemsPerPage={handleChangeItems}
                   currentPage={form.page}
                   currentItemsPerPage={form.limit}
                 />
@@ -194,52 +220,55 @@ export const Credits = () => {
               className="w-full"
               headers={tableRowScheme}
               data={dataList}
-              loading={loading}
+              isLoading={loading}
             >
+
+              <ComposedTable.Column content={({ user }) => user?.username ?? '-'} />
+              <ComposedTable.Column content={({ user }) => user?.email ?? '-'} />
+              <ComposedTable.Column content={({ user }) => user?.phone ?? '-'} />
+              <ComposedTable.Column content={({ amount }) => `$${amount?.toFixed(2) ?? 'N/A'}`} />
+
               <ComposedTable.Column
-                // Nombre cliente
-                content={({ sale }) => sale?.user?.username ?? '-'}
-              />
-              <ComposedTable.Column
-                // Correo
-                content={({ sale }) => sale?.user?.email ?? '-'}
-              />
-              <ComposedTable.Column
-                // Teléfono
-                content={({ sale }) => sale?.user?.phone ?? '-'}
-              />
-              <ComposedTable.Column
-                // Monto total (del crédito)
-                content={({ amount }) => `$${amount?.toFixed(2) ?? '-'}`}
-              />
-              <ComposedTable.Column
-                // Total venta asociada al crédito
-                content={({ sale }) => `$${sale?.total?.toFixed(2) ?? '-'}`}
-              />
-              <ComposedTable.Column
-                // Último pago (último movimiento en changes)
-                content={({ changes }) => {
-                  if (!changes?.length) return '-';
-                  const last = changes[changes.length - 1];
-                  return last
-                    ? `$${last.changeAmount?.toFixed(2)} - ${new Date(last.date).toLocaleDateString()}`
-                    : '-';
-                }}
-              />
-              <ComposedTable.Column
-                // Status
-                content={({ status }) => status}
-              />
-              <ComposedTable.Column
-                // Opciones (botones de editar/eliminar)
-                content={({ id }) => (
-                  <OptionButtons
-                    onUpdate={() => console.log('Update', id)}
-                    onDelete={() => console.log('Delete', id)}
-                  />
+                content={({ saldoActual }) => (
+                  <span style={{ color: saldoActual <= 0 ? '#d32f2f' : '#388e3c', fontWeight: 600 }}>
+                  ${saldoActual ?? 'N/A'}
+                  </span>
                 )}
               />
 
+              {/* Último pago */}
+              <ComposedTable.Column
+                content={({ changes }) => {
+                  if (!changes?.length) return 'N/A';
+                  const last = changes[changes.length - 1];
+                  return last
+                    ? (
+                      <>
+                        <span style={{ fontWeight: 600 }}>
+                          {last.changeAmount > 0 ? '+' : ''}
+                          {last.changeAmount}
+                        </span>
+                        {' - '}
+                        <span>
+                          {new Date(last.date).toLocaleDateString()}
+                        </span>
+                      </>
+                    )
+                    : '-';
+                }}
+              />
+              <ComposedTable.Column content={({ status }) => (
+                <Chip label={status} color={status === 'ACTIVE' ? 'success' : 'primary' } variant="outlined" />
+              )} />
+              <ComposedTable.Column
+                content={({ id }) => (
+                  <OptionButtons
+                    onUpdate={() => handleUpdate(id)}
+                    onDelete={() => handleDelete(id)}
+                    role={user?.role}
+                  />
+                )}
+              />
             </ComposedTable>
             <Grid container spacing={1} className="p-2 mt-24 flex">
               <Grid item xs={12} md={12} className="py-8">
@@ -247,8 +276,8 @@ export const Credits = () => {
                   <Paginator
                     totalPages={form.total}
                     totalItems={form.limit}
-                    onChangeCurrentPage={(page) => handleChangePage(page)}
-                    onChangeItemsPerPage={(items) => handleChangeItems(items)}
+                    onChangeCurrentPage={handleChangePage}
+                    onChangeItemsPerPage={handleChangeItems}
                     currentPage={form.page}
                     currentItemsPerPage={form.limit}
                   />

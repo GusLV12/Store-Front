@@ -19,7 +19,7 @@ export const Home = () => {
     total: 0,
   });
 
-  const { makeRequest, response, loading, error } = useRequest(getProducts);
+  const { makeRequest, response, loading } = useRequest(getProducts);
   const { triggerAction } = useNativeDebounce();
 
   const handleSearchQuery = (query = '') => {
@@ -47,7 +47,7 @@ export const Home = () => {
   useEffect(() => {
     triggerAction().then((isOk) => {
       if (!isOk) return;
-      makeRequest({ params: form });
+      makeRequest(form);
     });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [form.search, form.page, form.limit]);
@@ -61,14 +61,6 @@ export const Home = () => {
       total: response.total ?? prev.total,
     }));
   }, [response]);
-
-  if(loading) {
-    return (
-      <Stack spacing={2} direction="row" alignItems="center">
-        <CircularProgress size="3rem" />
-      </Stack>
-    );
-  }
 
   return (
     <>

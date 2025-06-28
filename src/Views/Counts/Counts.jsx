@@ -8,7 +8,6 @@ import { useNavigate } from 'react-router-dom';
 import { useNativeDebounce, useRequest } from '@/Hooks';
 import { deleteUser, getUsers} from '@/api/user';
 import { useModal } from '@/Context/ModalContext/ModalContext';
-import { ProductOverviewModal } from '@/modals/ProductOverviewModal/ProductOverviewModal';
 
 import { ComposedTable, DeleteModal, InputSearch, Paginator } from '../../Components/index';
 
@@ -159,11 +158,11 @@ const { openModal, closeModal, } = useModal();
 
   const handleCreate = () => {
     console.log('Haciendo clic en crear usuario');
-    navigate('/users/create');
+    navigate('/counts/create');
   };
 
   const handleUpdate = (id) => {
-    navigate(`/users/edit/${id}`);
+    navigate(`/counts/edit/${id}`);
   };
 
   return (
@@ -243,7 +242,6 @@ const { openModal, closeModal, } = useModal();
           </div>
         </Grid>
       </Grid>
-
     </>
   );
 };

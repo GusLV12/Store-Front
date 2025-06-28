@@ -1,13 +1,15 @@
 import { memo, useEffect, useState } from 'react';
-import { Grid, Box, Tooltip, Button } from '@mui/material';
+import { Grid, Box, Tooltip, Button, Chip } from '@mui/material';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import CloudSyncIcon from '@mui/icons-material/CloudSync';
 import EditIcon from '@mui/icons-material/Edit';
+import { useNavigate } from 'react-router-dom';
 
 import { useNativeDebounce, useRequest } from '@/Hooks';
-import { getSuppliers } from '@/api/suppliers';
+import { deleteSupplier, getSuppliers } from '@/api/suppliers';
+import { useModal } from '@/Context/ModalContext/ModalContext';
 
-import { ComposedTable, InputSearch, Paginator } from '../../Components/index';
+import { ComposedTable, DeleteModal, InputSearch, Paginator } from '../../Components/index';
 
 const tableRowScheme = [
   {
@@ -33,11 +35,6 @@ const tableRowScheme = [
     maxWidth: '200px',
   },
   {
-    title: 'Productos',
-    width: '200px',
-    minWidth: '200px',
-  },
-  {
     title: 'Status',
     minWidth: '100px',
   },
@@ -52,7 +49,7 @@ const OptionButtons = memo(
   ({ onUpdate = () => {}, onDelete = () => {} }) => {
     return (
       <div className="flex w-full flex-wrap flex-row justify-between items-center">
-        <Tooltip title="Editar provedor">
+        <Tooltip title="Editar proveedor">
           <span>
             <Button
               className="my-3"
@@ -86,6 +83,7 @@ const OptionButtons = memo(
   });
 
 export const Suppliers = () => {
+  const { openModal, closeModal, } = useModal();
   const [querySearch, setQuerySearch] = useState('');
   const [dataList, setDataList] = useState([]);
   const [form, setForm] = useState({
@@ -95,8 +93,12 @@ export const Suppliers = () => {
     total: 0,
   });
 
+  // Navegacion a rutas hijas
+  const navigate = useNavigate();
+
   // Consumiendo endpoints
   const { makeRequest, response, loading } = useRequest(getSuppliers);
+  const { makeRequest: tryDeleteSupplier } = useRequest(deleteSupplier);
 
   const { triggerAction } = useNativeDebounce(600);
 
@@ -117,10 +119,25 @@ export const Suppliers = () => {
     }));
   }, [response]);
 
+  // Modal de eliminar
+  const handleDelete = (id) => openModal(
+    <DeleteModal
+      open
+      onClose={(wasDeleted) => {
+        closeModal();
+        if (wasDeleted) {
+          handleFilterSearchQuery();
+        }
+      }}
+      id={id}
+      descripcion="¿Seguro que deseas eliminar este proveedor?"
+      makeRequest={() => tryDeleteSupplier(id)}
+    />);
+
   const handleFilterSearchQuery = async () => {
     triggerAction().then((isOk) => {
       if (!isOk) return;
-      makeRequest({ params: form });
+      makeRequest(form);
     });
   };
 
@@ -149,6 +166,14 @@ export const Suppliers = () => {
     }));
   };
 
+  const handleCreate = () => {
+    navigate('/suppliers/create');
+  };
+
+  const handleUpdate = (id) => {
+    navigate(`/suppliers/edit/${id}`);
+  };
+
   return (
     <>
       <Grid container spacing={6}>
@@ -158,25 +183,24 @@ export const Suppliers = () => {
               className="my-6 w-4/5"
               placeholder="Escribe un nombre para buscar contacto"
               value={querySearch}
-              onChange={(query) => setQuerySearch(query)}
+              onChange={handleSearchQuery}
             />
+            <div className="px-4 py-4">
+              <Button
+                variant="contained"
+                color="primary"
+                className="whitespace-nowrap mx-4"
+                onClick={handleCreate}
+              >
+              Agregar provedor
+              </Button>
+            </div>
           </Box>
         </Grid>
         <Grid item xs={12}>
           <Grid container spacing={1} className="p-2">
             <Grid item xs={12} className="p-8 mb-24">
               <div className="flex flex-row w-full justify-end">
-                <div className="mx-10 my-2 md:my-0 justify-center items-center flex">
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    size="medium"
-                    fullWidth
-                    onClick={() => console.log('Agregar producto')}
-                  >
-                              Agregar producto
-                  </Button>
-                </div>
 
                 <Paginator
                   totalPages={form.total}
@@ -201,13 +225,15 @@ export const Suppliers = () => {
               <ComposedTable.Column content={({ phone }) => phone} />
               <ComposedTable.Column content={({ email }) => email} />
               <ComposedTable.Column content={({ address }) => address} />
-              <ComposedTable.Column content={({ products }) => products} />
-              <ComposedTable.Column content={({ status }) => status} />
+              <ComposedTable.Column content={({ status }) => (
+                <Chip label={status ? 'Activo' : 'Inactivo'} color={status ? 'success' : 'error'} variant="outlined" />
+              )} />
+
               <ComposedTable.Column
                 content={({ id }) => (
                   <OptionButtons
-                    onUpdate={() => console.log('Update')}
-                    onDelete={() => console.log('Delete')}
+                    onUpdate={() => handleUpdate(id)}
+                    onDelete={() => handleDelete(id)}
                   />
                 )}
               />

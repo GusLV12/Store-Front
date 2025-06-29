@@ -19,7 +19,7 @@ import { useModal } from '@/Context/ModalContext/ModalContext';
 
 export const ProductOverviewModal = () => {
   const { closeModal } = useModal();
-  const { cart, removeFromCart } = useCart();
+  const { cart, removeFromCart, clearCart } = useCart();
   const navigate = useNavigate();
 
   const items = cart.filter(p => (p.quantity || 0) > 0);
@@ -84,7 +84,10 @@ export const ProductOverviewModal = () => {
           <Typography variant="body2">IVA Total (16%): ${ivaTotal.toFixed(2)}</Typography>
           <Typography variant="h6">Total: ${total.toFixed(2)}</Typography>
         </Box>
-        <Button variant="contained" color="success" onClick={() => handleNavigateToPayment()}>
+        <Button variant="contained" color="primary" onClick={() => clearCart()} disabled={items.length === 0}>
+          Limpiar venta
+        </Button>
+        <Button variant="contained" color="success" onClick={() => handleNavigateToPayment()} disabled={items.length === 0}>
           Confirmar Pago
         </Button>
       </Box>

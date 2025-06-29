@@ -1,22 +1,28 @@
-import { Box, Button, Card, CardActionArea, CardActions, CardContent, CardMedia, IconButton, Typography } from '@mui/material';
-import SkipPreviousIcon from '@mui/icons-material/SkipPrevious';
-import PlayArrowIcon from '@mui/icons-material/PlayArrow';
-import SkipNextIcon from '@mui/icons-material/SkipNext';
+import { Box, Card, CardActionArea, CardActions, CardContent, CardMedia, IconButton, Typography } from '@mui/material';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
-import { useState } from 'react';
 
-export const ProductCard = ({ img = 'img/banners/boxes.jpg', name = 'producto', description = '', stock }) => {
-  const[quantity, setQuantity] = useState(0);
+import { useCart } from '@/Context/CartContext/CartContext';
+
+export const ProductCard = ({
+  img = 'img/banners/boxes.jpg',
+  name = 'producto',
+  description = '',
+  stock,
+  price,
+  ...product // Pasa todo el producto completo (barcode, id, etc.)
+}) => {
+  const { setProductQuantity, getQuantity } = useCart();
+  const quantity = getQuantity(product.barcode);
 
   const handleAdd = () => {
     if (quantity < stock) {
-      setQuantity(quantity + 1);
+      setProductQuantity(product, quantity + 1);
     }
   };
   const handleRemove = () => {
     if (quantity > 0) {
-      setQuantity(quantity - 1);
+      setProductQuantity(product, quantity - 1);
     }
   };
 
@@ -38,15 +44,26 @@ export const ProductCard = ({ img = 'img/banners/boxes.jpg', name = 'producto', 
           </Typography>
         </CardContent>
       </CardActionArea>
-      <CardActions className="flex justify-end">
+      <CardActions className="flex justify-evenly">
+
+        <Box>
+          <Typography
+            variant="h6"
+            color="primary"
+            sx={{ fontWeight: 700, ml: 1 }}
+          >
+          ${Number(price).toFixed(2)}
+          </Typography>
+        </Box>
+
         <Box sx={{ display: 'flex', alignItems: 'center', pl: 1, pb: 1 }}>
-          <IconButton aria-label="previous" onClick={handleRemove}>
+          <IconButton aria-label="previous" onClick={handleRemove} disabled={quantity === 0}>
             <RemoveCircleOutlineIcon />
           </IconButton>
-          <IconButton aria-label="play/pause">
+          <IconButton aria-label="quantity" disabled>
             {quantity}
           </IconButton>
-          <IconButton aria-label="next" onClick={handleAdd}>
+          <IconButton aria-label="next" onClick={handleAdd} disabled={quantity >= stock}>
             <AddCircleOutlineIcon />
           </IconButton>
         </Box>

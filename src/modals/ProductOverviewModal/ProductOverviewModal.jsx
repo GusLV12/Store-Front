@@ -1,8 +1,8 @@
+// src/modals/ProductOverviewModal/ProductOverviewModal.jsx
 import {
   Box,
   Button,
   Card,
-  CardContent,
   Typography,
   Divider,
   Table,
@@ -12,17 +12,25 @@ import {
   TableRow,
 } from '@mui/material';
 import ShoppingCartCheckoutIcon from '@mui/icons-material/ShoppingCartCheckout';
+import { useNavigate } from 'react-router-dom';
 
-export const ProductOverviewModal = ({ data = [] }) => {
-  const cart = data.length ? data : [
-    { name: 'Manzanas', price: 12.5, quantity: 3 },
-    { name: 'Pan', price: 20, quantity: 2 },
-    { name: 'Leche', price: 18, quantity: 1 },
-  ];
+import { useCart } from '@/Context/CartContext/CartContext';
+import { useModal } from '@/Context/ModalContext/ModalContext';
 
-  const subtotal = cart.reduce((acc, p) => acc + p.price * p.quantity, 0);
+export const ProductOverviewModal = () => {
+  const { closeModal } = useModal();
+  const { cart, removeFromCart, clearCart } = useCart();
+  const navigate = useNavigate();
+
+  const items = cart.filter(p => (p.quantity || 0) > 0);
+  const subtotal = items.reduce((acc, p) => acc + (p.saleCost || p.price) * (p.quantity || 1), 0);
   const ivaTotal = subtotal * 0.16;
   const total = subtotal + ivaTotal;
+
+  const handleNavigateToPayment = () => {
+    navigate('/payment');
+    closeModal();
+  };
 
   return (
     <Card sx={{ minWidth: 700, padding: 2 }}>
@@ -30,12 +38,10 @@ export const ProductOverviewModal = ({ data = [] }) => {
         <Typography variant="h6" gutterBottom>
           Detalle de la compra
         </Typography>
-
         <Box position="absolute" right={0}>
           <ShoppingCartCheckoutIcon color="primary" />
         </Box>
       </Box>
-
       <Divider sx={{ mb: 2 }} />
       <Table size="small">
         <TableHead>
@@ -45,34 +51,43 @@ export const ProductOverviewModal = ({ data = [] }) => {
             <TableCell align="right">Cantidad</TableCell>
             <TableCell align="right">IVA</TableCell>
             <TableCell align="right">Subtotal</TableCell>
+            <TableCell align="right"></TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
-          {cart.map((item, index) => {
-            const subtotalItem = item.price * item.quantity;
+          {items.map((item, index) => {
+            const precio = item.saleCost ?? item.price;
+            const cantidad = item.quantity || 1;
+            const subtotalItem = precio * cantidad;
             const ivaItem = subtotalItem * 0.16;
             return (
               <TableRow key={index}>
                 <TableCell>{item.name}</TableCell>
-                <TableCell align="right">${item.price.toFixed(2)}</TableCell>
-                <TableCell align="right">{item.quantity}</TableCell>
+                <TableCell align="right">${precio.toFixed(2)}</TableCell>
+                <TableCell align="right">{cantidad}</TableCell>
                 <TableCell align="right">${ivaItem.toFixed(2)}</TableCell>
                 <TableCell align="right">${subtotalItem.toFixed(2)}</TableCell>
+                <TableCell align="right">
+                  <Button size="small" color="error" onClick={() => removeFromCart(item.barcode)}>
+                    Quitar
+                  </Button>
+                </TableCell>
               </TableRow>
             );
           })}
         </TableBody>
       </Table>
-
       <Divider sx={{ my: 2 }} />
-
       <Box className="flex justify-between items-center">
         <Box>
           <Typography variant="body2">Subtotal: ${subtotal.toFixed(2)}</Typography>
           <Typography variant="body2">IVA Total (16%): ${ivaTotal.toFixed(2)}</Typography>
           <Typography variant="h6">Total: ${total.toFixed(2)}</Typography>
         </Box>
-        <Button variant="contained" color="success">
+        <Button variant="contained" color="primary" onClick={() => clearCart()} disabled={items.length === 0}>
+          Limpiar venta
+        </Button>
+        <Button variant="contained" color="success" onClick={() => handleNavigateToPayment()} disabled={items.length === 0}>
           Confirmar Pago
         </Button>
       </Box>

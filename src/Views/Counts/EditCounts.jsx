@@ -29,6 +29,7 @@ export const EditCounts = () => {
     handleSubmit,
     reset,
     formState: { errors, isValid, dirtyFields },
+    watch
   } = useForm({
     defaultValues: { ...defaultValues },
     resolver: yupResolver(schemaUser),
@@ -154,22 +155,24 @@ export const EditCounts = () => {
               sx={{ borderRadius: 2 }}
             />
           </Box>
-           {/* contraseña */}
-          <Box mb={2}>
-            <Typography variant="subtitle1" fontWeight={500} mb={0.5}>
-              Contraseña
-            </Typography>
-            <TextField
-              fullWidth
-              type="password"
-              {...control.register('password')}
-              placeholder="contraseña"
-              error={!!errors.password}
-              helperText={errors?.password?.message}
-              variant="outlined"
-              sx={{ borderRadius: 2 }}
-            />
+          {/* contraseña */}
+          {['admin', 'user'].includes(watch('role')) && (
+            <Box mb={2}>
+              <Typography variant="subtitle1" fontWeight={500} mb={0.5}>
+                Contraseña
+              </Typography>
+              <TextField
+                fullWidth
+                type="password"
+                {...control.register('password')}
+                placeholder="contraseña"
+                error={!!errors.password}
+                helperText={errors?.password?.message}
+                variant="outlined"
+                sx={{ borderRadius: 2 }}
+              />
           </Box>
+          )}
           {/* Rol */}
           <Box mb={2}>
             <Typography variant="subtitle1" fontWeight={500} mb={0.5}>

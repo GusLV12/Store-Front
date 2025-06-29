@@ -26,7 +26,7 @@ export const AppRoutes = () => {
 
           <Route path="/billing" element={<ProtectedRoute allowedRole={['admin','user']}><Billing/></ProtectedRoute>} />
           <Route path="/profile" element={<ProtectedRoute allowedRole={['admin','user']}><Profile/></ProtectedRoute>} />
-          <Route path="/promotions" element={<ProtectedRoute allowedRole={['admin']}><Promotion/></ProtectedRoute>} />
+          <Route path="/promotions/:id" element={<ProtectedRoute allowedRole={['admin']}><Promotion/></ProtectedRoute>} />
 
           {/* Rutas de créditos */}
           <Route path="/credits" element={<ProtectedRoute allowedRole={['user', 'admin']}><Credits/></ProtectedRoute>} />

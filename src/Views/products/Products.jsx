@@ -2,6 +2,7 @@ import { memo, useEffect, useState } from 'react';
 import { Grid, Box, Tooltip, Button } from '@mui/material';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import EditIcon from '@mui/icons-material/Edit';
+import LocalOffer from '@mui/icons-material/LocalOffer'
 import { useNavigate } from 'react-router-dom';
 
 import { useNativeDebounce, useRequest } from '@/Hooks';
@@ -46,7 +47,7 @@ const tableRowScheme = [
 ];
 
 const OptionButtons = memo(
-  ({ onUpdate = () => {}, onDelete = () => {} }) => {
+  ({ onUpdate = () => {}, addPromotion = () => {}, onDelete = () => {} }) => {
     return (
       <div className="flex w-full flex-wrap flex-row justify-between items-center">
         <Tooltip title="Editar producto">
@@ -60,6 +61,21 @@ const OptionButtons = memo(
               sx={{ minWidth: '3.2rem', aspectRatio: 1 / 1, padding: '0rem', borderRadius: '50%' }}
             >
               <EditIcon />
+            </Button>
+          </span>
+        </Tooltip>
+
+        <Tooltip title="Agregar promocion">
+          <span>
+            <Button
+              className="my-3"
+              onClick={addPromotion}
+              size="small"
+              variant="contained"
+              color="primary"
+              sx={{ minWidth: '3.2rem', aspectRatio: 1 / 1, padding: '0rem', borderRadius: '50%' }}
+            >
+              <LocalOffer />
             </Button>
           </span>
         </Tooltip>
@@ -173,6 +189,10 @@ export const Products = () => {
     navigate(`/products/edit/${id}`);
   };
 
+  const handlePromotions = (id) => {
+    navigate(`/promotions/${id}`);
+  }
+
   return (
     <>
       <Grid container spacing={6}>
@@ -229,6 +249,7 @@ export const Products = () => {
                 content={({ id }) => (
                   <OptionButtons
                     onUpdate={() => handleUpdate(id)}
+                    addPromotion={()=> handlePromotions(id)}
                     onDelete={() => handleDelete(id)}
                   />
                 )}

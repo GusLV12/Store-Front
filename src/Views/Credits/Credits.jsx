@@ -12,41 +12,14 @@ import { useAuth } from '@/Context';
 import { ComposedTable, DeleteModal, InputSearch, Paginator } from '../../Components';
 
 const tableRowScheme = [
-  {
-    title: 'Nombre cliente',
-    minWidth: '220px',
-  },
-  {
-    title: 'Correo',
-    minWidth: '180px',
-  },
-  {
-    title: 'Teléfono',
-    minWidth: '140px',
-  },
-  {
-    title: 'Monto credito',
-    minWidth: '140px',
-  },
-  {
-    title: 'Total venta',
-    width: '160px',
-    maxWidth: '200px',
-  },
-  {
-    title: 'Ultimo cambio',
-    width: '200px',
-    minWidth: '200px',
-  },
-  {
-    title: 'Status',
-    minWidth: '100px',
-  },
-  {
-    title: 'Opciones',
-    minWidth: '100px',
-    fixedRight: true,
-  },
+  { title: 'Nombre cliente', minWidth: '220px' },
+  { title: 'Correo', minWidth: '180px' },
+  { title: 'Teléfono', minWidth: '140px' },
+  { title: 'Monto crédito', minWidth: '140px' },
+  { title: 'Crédito disponible', width: '160px', maxWidth: '200px' },
+  { title: 'Último cambio', width: '200px', minWidth: '200px' },
+  { title: 'Status', minWidth: '100px' },
+  { title: 'Opciones', minWidth: '100px', fixedRight: true },
 ];
 
 const OptionButtons = memo(
@@ -87,7 +60,7 @@ const OptionButtons = memo(
 );
 
 export const Credits = () => {
-  const { openModal, closeModal, } = useModal();
+  const { openModal, closeModal } = useModal();
   const navigate = useNavigate();
   const { user } = useAuth();
   const [querySearch, setQuerySearch] = useState('');
@@ -105,13 +78,11 @@ export const Credits = () => {
 
   const { triggerAction } = useNativeDebounce(600);
 
-  // Ejecuta cuando cambia search, page o limit
   useEffect(() => {
     handleFilterSearchQuery();
     // eslint-disable-next-line
   }, [form.search, form.page, form.limit]);
 
-  // Actualiza dataList y total solo cuando llega nueva respuesta
   useEffect(() => {
     if (!response) return;
     setDataList(response.data || []);
@@ -128,7 +99,6 @@ export const Credits = () => {
     });
   };
 
-  // Actualiza el input de búsqueda y el filtro (resetea a página 1)
   const handleSearchQuery = (query = '') => {
     setQuerySearch(query);
     setForm((prev) => ({
@@ -154,28 +124,41 @@ export const Credits = () => {
   };
 
   // Modal de eliminar
-  const handleDelete = (id) => openModal(
-    <DeleteModal
-      open
-      onClose={(wasDeleted) => {
-        closeModal();
-        if (wasDeleted) {
-          handleFilterSearchQuery();
-        }
-      }}
-      id={id}
-      descripcion="¿Seguro que deseas eliminar este credito?"
-      makeRequest={() => tryDeleteCredit(id)}
-    />);
+  const handleDelete = (id) =>
+    openModal(
+      <DeleteModal
+        open
+        onClose={(wasDeleted) => {
+          closeModal();
+          if (wasDeleted) {
+            handleFilterSearchQuery();
+          }
+        }}
+        id={id}
+        descripcion="¿Seguro que deseas eliminar este crédito?"
+        makeRequest={() => tryDeleteCredit(id)}
+      />
+    );
 
   const handleCreate = () => {
     navigate('/credits/create');
   };
 
-  // Editar
   const handleUpdate = (id) => {
     navigate(`/credits/edit/${id}`);
   };
+
+  // --- AQUI MAPEO LA DATA PARA SALDO ACTUAL ---
+  const tablaData = dataList.map(item => {
+    // Cambios: cargos positivos, abonos negativos (estándar)
+    const totalDeuda = item.changes?.reduce((acc, mov) => acc + mov.changeAmount, 0) || 0;
+    // Crédito disponible (lo que aún puede gastar)
+    const saldoActual = item.amount - totalDeuda;
+    return {
+      ...item,
+      saldoActual,
+    };
+  });
 
   return (
     <>
@@ -219,10 +202,9 @@ export const Credits = () => {
             <ComposedTable
               className="w-full"
               headers={tableRowScheme}
-              data={dataList}
+              data={tablaData}
               isLoading={loading}
             >
-
               <ComposedTable.Column content={({ user }) => user?.username ?? '-'} />
               <ComposedTable.Column content={({ user }) => user?.email ?? '-'} />
               <ComposedTable.Column content={({ user }) => user?.phone ?? '-'} />
@@ -230,36 +212,48 @@ export const Credits = () => {
 
               <ComposedTable.Column
                 content={({ saldoActual }) => (
-                  <span style={{ color: saldoActual <= 0 ? '#d32f2f' : '#388e3c', fontWeight: 600 }}>
-                  ${saldoActual ?? 'N/A'}
+                  <span style={{
+                    color: saldoActual < 0
+                      ? '#d32f2f'
+                      : saldoActual < 50
+                        ? '#ffa000'
+                        : '#388e3c',
+                    fontWeight: 600
+                  }}>
+                    ${saldoActual.toFixed(2)}
                   </span>
                 )}
               />
 
-              {/* Último pago */}
               <ComposedTable.Column
                 content={({ changes }) => {
                   if (!changes?.length) return 'N/A';
-                  const last = changes[changes.length - 1];
-                  return last
-                    ? (
-                      <>
-                        <span style={{ fontWeight: 600 }}>
-                          {last.changeAmount > 0 ? '+' : ''}
-                          {last.changeAmount}
-                        </span>
-                        {' - '}
-                        <span>
-                          {new Date(last.date).toLocaleDateString()}
-                        </span>
-                      </>
-                    )
-                    : '-';
+                  // Ordena por fecha descendente para garantizar que el más reciente sea el primero
+                  const ordenados = [...changes].sort(
+                    (a, b) => new Date(b.date) - new Date(a.date)
+                  );
+                  const last = ordenados[0];
+                  const esAbono = last.changeAmount < 0;
+                  return last ? (
+                    <>
+                      <span style={{
+                        fontWeight: 600,
+                        color: esAbono ? '#388e3c' : '#d32f2f'
+                      }}>
+                        {esAbono ? 'Abono ' : 'Cargo '}
+          ${Math.abs(last.changeAmount)}
+                      </span>
+                      {' - '}
+                      <span>{new Date(last.date).toLocaleDateString()}</span>
+                    </>
+                  ) : '-';
                 }}
               />
+
               <ComposedTable.Column content={({ status }) => (
-                <Chip label={status} color={status === 'ACTIVE' ? 'success' : 'primary' } variant="outlined" />
+                <Chip label={status} color={status === 'ACTIVE' ? 'success' : 'primary'} variant="outlined" />
               )} />
+
               <ComposedTable.Column
                 content={({ id }) => (
                   <OptionButtons

@@ -6,17 +6,30 @@ import {
 import ShoppingCartCheckoutIcon from '@mui/icons-material/ShoppingCartCheckout';
 import { useNavigate } from 'react-router-dom';
 
+import { LoadingSpinner } from '@/Components/LoadingSpinner/LoadingSpinner';
 import { useCart } from '@/Context/CartContext/CartContext';
 import { useRequest } from '@/Hooks';
 import { catalogUsers } from '@/api/user';
 import { createCreditChange, creditByUser } from '@/api/credits';
 import { createSale } from '@/api/sales';
+import { createSalePromotion } from '@/api/salesPromotions';
 import { useAuth } from '@/Context';
+import { getPromotions } from '@/api/promotions';
 
 export const GoToPay = () => {
   const { cart, removeFromCart, clearCart } = useCart();
+  const [loadingData, setLoadingData] = useState(true);
   const navigate = useNavigate();
   const { user } = useAuth();
+
+  // Promociones 
+  const { makeRequest: trygetPromotions, response: dataPromotions } = useRequest(getPromotions);
+  //filtrar promociones activas
+  const isPromotionActive = (item) => {
+    const nowDate = new Date();
+    return new Date(item.startDate) <= nowDate && nowDate <= new Date(item.endDate);
+  };
+  const activePromotions = Array.isArray(dataPromotions) ? dataPromotions.filter(promotion => isPromotionActive(promotion)) : [];
 
   // Usuarios (clientes)
   const { makeRequest: tryGetUsers, response: dataUsersRaw } = useRequest(catalogUsers);
@@ -32,11 +45,18 @@ export const GoToPay = () => {
   // Generar compra
   const { makeRequest: tryCreatePayment } = useRequest(createSale);
 
+  // Generar compra con promocion
+  const { makeRequest: tryCreatePaymentPromotion } = useRequest(createSalePromotion);
+
   useEffect(() => { tryGetUsers(); }, []);
   useEffect(() => {
     if (selectedUser?.id) tryGetCredit(selectedUser.id);
   }, [selectedUser]);
-
+  useEffect (() => { 
+    setLoadingData(true);
+    trygetPromotions();
+    setLoadingData(false);
+  }, []);
   // Cálculo de saldo real
   let saldoDisponible = null;
   if (creditUser && typeof creditUser.amount === 'number' && Array.isArray(creditUser.changes)) {
@@ -46,7 +66,32 @@ export const GoToPay = () => {
   }
 
   const items = cart.filter(p => (p.quantity || 0) > 0);
-  const subtotal = items.reduce((acc, p) => acc + (p.saleCost || p.price) * (p.quantity || 1), 0);
+  let subtotal = 0;
+  let discount = 0;
+  if (activePromotions){
+    items.forEach((item) => {
+      const promotion = activePromotions.find(p => p.productId === item.id);
+      if (promotion){
+        const unitPrice = item.saleCost ?? item.price; // Precio real a usar
+        const typePromotion = promotion.type.split('x');
+        const m = parseInt(typePromotion[0],10);
+        const n = parseInt(typePromotion[1],10);
+
+        const promoGroups = Math.floor(item.quantity / m);
+        const remainingUnits = item.quantity % m;
+
+        const quantityToCharge = (promoGroups * n) + remainingUnits;
+        const discountOnItem = (item.quantity - quantityToCharge) * unitPrice;
+
+        discount += discountOnItem;
+        subtotal += quantityToCharge * unitPrice;
+      }else{
+        subtotal += (item.saleCost ?? item.price) * (item.quantity || 1);
+      }
+    });
+  } else{
+    subtotal = items.reduce((acc, p) => acc + (p.saleCost || p.price) * (p.quantity || 1), 0);
+  }
   const ivaTotal = subtotal * 0.16;
   const total = subtotal + ivaTotal;
 
@@ -73,7 +118,7 @@ export const GoToPay = () => {
         iva: (item.saleCost ?? item.price) * item.quantity * 0.16
       }));
 
-      await tryCreatePayment({
+      const saleResponse = await tryCreatePayment({
         userId: user.id,
         clientId: paymentType === 'credit' && selectedUser ? selectedUser.id : null,
         total,
@@ -82,6 +127,20 @@ export const GoToPay = () => {
         paymentType: paymentType === 'credit' ? 'CREDITO' : 'EFECTIVO',
         productSales
       });
+
+      // .-si hubo descuento por promocion registrarlo
+      if (discount > 0){
+        const saleIde = saleResponse.id;
+        items.forEach((item) => {
+          const promotion = activePromotions.find(p => p.productId === item.id);
+          if (promotion) {
+              tryCreatePaymentPromotion({
+              saleId: saleIde,
+              promotionId: promotion.id
+            });
+          }
+        });
+      }
 
       // 2. Registrar el movimiento de crédito SOLO si es a crédito
       if (paymentType === 'credit') {
@@ -101,6 +160,14 @@ export const GoToPay = () => {
       console.error(err);
     }
   };
+
+  if (loadingData) {
+        return (
+          <Box sx={{ minHeight: '80vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <LoadingSpinner size="3rem" />
+          </Box>
+        );
+  }
 
   return (
     <Box sx={{ maxWidth: 700, mx: 'auto', my: 5 }}>
@@ -166,7 +233,6 @@ export const GoToPay = () => {
         <Table size="small">
           <TableHead>
             <TableRow sx={{ backgroundColor: '#081b29' }}>
-              <TableCell sx={{ color: '#fff' }}>Producto</TableCell>
               <TableCell align="right" sx={{ color: '#fff' }}>Precio</TableCell>
               <TableCell align="right" sx={{ color: '#fff' }}>Cantidad</TableCell>
               <TableCell align="right" sx={{ color: '#fff' }}>IVA</TableCell>
@@ -182,7 +248,6 @@ export const GoToPay = () => {
               const ivaItem = subtotalItem * 0.16;
               return (
                 <TableRow key={index}>
-                  <TableCell>{item.name}</TableCell>
                   <TableCell align="right">${precio.toFixed(2)}</TableCell>
                   <TableCell align="right">{cantidad}</TableCell>
                   <TableCell align="right">${ivaItem.toFixed(2)}</TableCell>
@@ -206,6 +271,10 @@ export const GoToPay = () => {
         <Box className="flex justify-between items-center"
           sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Box>
+            {discount > 0 &&(
+              <Typography>
+                Descuento por promoción: ${discount.toFixed(2)}
+              </Typography>)}
             <Typography variant="body2">Subtotal: ${subtotal.toFixed(2)}</Typography>
             <Typography variant="body2">IVA (16%): ${ivaTotal.toFixed(2)}</Typography>
             <Typography variant="h6">Total: ${total.toFixed(2)}</Typography>

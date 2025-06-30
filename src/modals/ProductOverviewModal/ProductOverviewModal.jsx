@@ -46,7 +46,6 @@ export const ProductOverviewModal = () => {
       <Table size="small">
         <TableHead>
           <TableRow>
-            <TableCell>Producto</TableCell>
             <TableCell align="right">Precio</TableCell>
             <TableCell align="right">Cantidad</TableCell>
             <TableCell align="right">IVA</TableCell>
@@ -62,7 +61,6 @@ export const ProductOverviewModal = () => {
             const ivaItem = subtotalItem * 0.16;
             return (
               <TableRow key={index}>
-                <TableCell>{item.name}</TableCell>
                 <TableCell align="right">${precio.toFixed(2)}</TableCell>
                 <TableCell align="right">{cantidad}</TableCell>
                 <TableCell align="right">${ivaItem.toFixed(2)}</TableCell>
